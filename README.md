@@ -27,3 +27,11 @@ seajs.use('fixed', function(fixed){
 `element` 是指需要跟随滚动的目标元素，接受 jQuery selector 对象。
 
 `marginTop` 指当元素距离当前可视窗口顶部的距离等于这个值时，开始触发跟随 fixed 状态。
+
+当把第二个参数设置的特别大时，这基本上就是一个 js 的全局 Fixed 解决方案。
+
+```js
+seajs.use('fixed', function(fixed){
+    Fixed('#test', 20000);
+});
+```
