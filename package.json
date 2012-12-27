@@ -1,0 +1,22 @@
+{
+    "name": "fixed",
+    "version": "1.0.0",
+    "root": "arale",
+    "description": "实现元素跟随滚动的效果。",
+    "homepage": "http://aralejs.org/fixed/",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aralejs/fixed"
+    },
+    "bugs": {
+        "url": "https://github.com/aralejs/fixed/issues"
+    },
+    "license": "MIT",
+    "dependencies": {
+        "$": "$"
+    },
+    "tests": ["fixed"],
+    "output": {
+        "fixed.js": "."
+    }
+}
