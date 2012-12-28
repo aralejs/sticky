@@ -1,7 +1,6 @@
 define(function(require, exports, module) {
 
     var $ = require('$');
-    var _fixed = false;
     // 用于保存可能修改到的样式
     var originStyles = {
         position: null,
@@ -18,7 +17,14 @@ define(function(require, exports, module) {
 
         // 准备一些基本元素
         element = $(element);
-        var win = $(window);
+        marginTop = marginTop || 0;
+        var doc = $(document);
+
+        // 一个元素指允许绑定一次
+        if (element.data('bind-fixed')) {
+            return;
+        }
+
         // 记录元素原来的位置
         var originTop = element.offset().top;
         // 保存原有的样式
@@ -28,47 +34,48 @@ define(function(require, exports, module) {
             }
         }
         
-        var scollFn = !ie6 ? function() {
+        var scrollFn = !ie6 ? function() {
             // 计算元素距离当前窗口上方的距离
-            var distance = originTop - win.scrollTop();
+            var distance = originTop - doc.scrollTop();
 
             // 当距离小于等于预设的值时
             // 将元素设为 fix 状态
-            if (!_fixed && distance <= marginTop) {
+            if (!element.data('_fixed') && distance <= marginTop) {
                 element.css({
                     position: 'fixed',
                     top: marginTop
                 });
-                _fixed = true;
-            } else if (_fixed && distance > marginTop) {
+                element.data('_fixed', true);
+            } else if (element.data('_fixed') && distance > marginTop) {
                 // 恢复原有的样式
                 element.css(originStyles);
-                _fixed = false;
+                element.data('_fixed', false);
             }
         } : function() {
             // 计算元素距离当前窗口上方的距离
-            var distance = originTop - win.scrollTop();
+            var distance = originTop - doc.scrollTop();
 
             // 当距离小于等于预设的值时
             // 将元素设为 fix 状态
             if (distance <= marginTop) {
                 element.css({
                     position: 'absolute',
-                    top: marginTop + win.scrollTop()
+                    top: marginTop + doc.scrollTop()
                 });
-                _fixed = true;
-            } else if (_fixed && distance > marginTop) {
+                element.data('_fixed', true);
+            } else if (element.data('_fixed') && distance > marginTop) {
                 // 恢复原有的样式
                 element.css(originStyles);
-                _fixed = false;
+                element.data('_fixed', false);
             }
         };
 
         // 先运行一次
-        scollFn();
-        // 监听滚动事件        
-        win[0].onscroll = scollFn;
-
+        scrollFn();
+        // 监听滚动事件
+        // fixed 是本模块绑定的滚动事件的命名空间
+        doc.on('scroll', scrollFn);
+        element.data('bind-fixed', true);
     };
 
     module.exports = Fixed;

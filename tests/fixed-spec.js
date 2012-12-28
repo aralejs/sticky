@@ -1,5 +1,7 @@
 define(function(require) {
 
+    //mocha.setup({ignoreLeaks: true});
+
     var Fixed = require('../src/fixed');
     var $ = require('$');
     var element = null;
@@ -20,6 +22,7 @@ define(function(require) {
             element.remove();
             element = null;
             $('body').css('height', '');
+            $(document).off('scroll');
             $(document).scrollTop(0);
         });
 
@@ -69,7 +72,21 @@ define(function(require) {
                 done();
             }, 0);
         });
+        
+        it('效率检查', function() {
+            Fixed(element, setTop);
+            Fixed(element, setTop);
+        });
 
+        it('重复绑定', function(done) {
+            Fixed(element, setTop);
+            Fixed(element, setTop + 100);   // 将无效
+            $(document).scrollTop(elementTop + 50);
+            setTimeout(function() {
+                expect(element.css('position')).to.be(ie6?'absolute':'fixed');
+                done();
+            }, 0);
+        });
 
     });
 
