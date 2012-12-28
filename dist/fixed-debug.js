@@ -22,6 +22,8 @@ define("arale/fixed/1.0.0/fixed-debug", [ "$-debug" ], function(require, exports
         }
         // 记录元素原来的位置
         var originTop = element.offset().top;
+        // 修正过高的 marginTop
+        marginTop = marginTop <= originTop ? marginTop : originTop;
         // 保存原有的样式
         for (var style in originStyles) {
             if (originStyles.hasOwnProperty(style)) {
