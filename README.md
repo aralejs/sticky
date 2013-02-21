@@ -2,8 +2,6 @@
 
 ---
 
-[![Build Status](https://secure.travis-ci.org/aralejs/fixed.png)](https://travis-ci.org/aralejs/fixed)
-
 实现侧边栏跟随滚动的效果，当滚动条滚动到一定距离时，指定区域变为 fixed 效果开始跟随页面。
 
 例如 [brunch.io](http://brunch.io/) 和 [bootstrap](http://twitter.github.com/bootstrap/getting-started.html) 页面左边侧边栏的效果，或着请看 [演示](/fixed/examples/)。
