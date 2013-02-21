@@ -2,7 +2,6 @@ define(function(require, exports, module) {
 
     var $ = require('$');
     var stickySupported = require('../src/detectSticky');
-    console.log(stickySupported);
 
     // 用于保存可能修改到的样式
     var originStyles = {
