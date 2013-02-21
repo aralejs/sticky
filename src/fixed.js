@@ -1,6 +1,9 @@
 define(function(require, exports, module) {
 
     var $ = require('$');
+    var stickySupported = require('../src/detectSticky');
+    console.log(stickySupported);
+
     // 用于保存可能修改到的样式
     var originStyles = {
         position: null,
@@ -13,7 +16,18 @@ define(function(require, exports, module) {
     // 制造跟随滚动效果的模块
     // element 是需要跟随滚动的目标元素
     // marginTop 指当元素距离可视窗口顶部的距离等于这个值时，开始触发跟随 fixed 状态
-    var Fixed = function(element, marginTop) {
+    var Fixed = stickySupported ? function(element, marginTop) {
+        element = $(element);
+        marginTop = marginTop || 0;
+
+        element.css({
+            position: '-webkit-sticky',
+            position: '-moz-sticky',
+            position: '-o-sticky',
+            position: 'sticky',
+            top: marginTop
+        });
+    } : function(element, marginTop) {
 
         // 准备一些基本元素
         element = $(element);
