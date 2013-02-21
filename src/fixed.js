@@ -16,9 +16,11 @@ define(function(require, exports, module) {
     var Fixed = function(element, marginTop) {
 
         // 准备一些基本元素
-        element = $(element);
-        marginTop = marginTop || 0;
         var doc = $(document);
+        var oldElem = $(element);
+        element = oldElem.clone();
+        marginTop = marginTop || 0;
+        $('body').append(element)
 
         // 一个元素指允许绑定一次
         if (element.data('bind-fixed')) {
@@ -26,7 +28,7 @@ define(function(require, exports, module) {
         }
 
         // 记录元素原来的位置
-        var originTop = element.offset().top;
+        var originTop = oldElem.offset().top;
         // 修正过高的 marginTop
         marginTop = marginTop<=originTop ? marginTop : originTop;
 
@@ -44,6 +46,7 @@ define(function(require, exports, module) {
             // 当距离小于等于预设的值时
             // 将元素设为 fix 状态
             if (!element.data('_fixed') && distance <= marginTop) {
+                oldElem.css('visibility', 'hidden')
                 element.css({
                     position: 'fixed',
                     top: marginTop
@@ -51,6 +54,7 @@ define(function(require, exports, module) {
                 element.data('_fixed', true);
             } else if (element.data('_fixed') && distance > marginTop) {
                 // 恢复原有的样式
+                oldElem.css('visibility', 'visible')
                 element.css(originStyles);
                 element.data('_fixed', false);
             }
