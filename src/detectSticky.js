@@ -16,4 +16,3 @@ define(function(require, exports, module) {
     return mStyle.position.indexOf(value) !== -1;
 
 });
-
