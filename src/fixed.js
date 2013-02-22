@@ -65,6 +65,7 @@ define(function(require, exports, module) {
             // 当距离小于等于预设的值时
             // 将元素设为 fix 状态
             if (distance <= marginTop) {
+                oldElem.css('visibility', 'hidden')
                 element.css({
                     position: 'absolute',
                     top: marginTop + doc.scrollTop()
@@ -72,6 +73,7 @@ define(function(require, exports, module) {
                 element.data('_fixed', true);
             } else if (element.data('_fixed') && distance > marginTop) {
                 // 恢复原有的样式
+                oldElem.css('visibility', 'visible')
                 element.css(originStyles);
                 element.data('_fixed', false);
             }
