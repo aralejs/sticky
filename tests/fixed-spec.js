@@ -27,48 +27,54 @@ define(function(require) {
         });
 
         it('滚动了一像素', function(done) {
-            var originPosition = element.css('position');            
-            Fixed(element, setTop);
+            var originPosition = element.css('visibility');            
+            var _element = Fixed(element, setTop);
             $(document).scrollTop(1);
             setTimeout(function() {
-                expect(element.css('position')).to.be(originPosition);
+                expect(element.css('visibility')).to.be(originPosition);
                 done();
             }, 0);
         });
 
         it('滚动到差一像素', function(done) {
-            var originPosition = element.css('position');
-            Fixed(element, setTop);
+            var originPosition = element.css('visibility');
+            var _element = Fixed(element, setTop);
             $(document).scrollTop(elementTop-1);
             setTimeout(function() {
-                expect(element.css('position')).to.be(originPosition);
+                expect(element.css('visibility')).to.be(originPosition);
                 done();
             }, 0);
         });
 
         it('滚动到元素临界位置', function(done) {
-            Fixed(element, setTop);
+            var _element = Fixed(element, setTop);
             $(document).scrollTop(elementTop);
             setTimeout(function() {
                 expect(element.css('position')).to.be(ie6?'absolute':'fixed');
+                expect(element.css('visibility')).to.be('hidden')
+                expect(_element.css('visibility')).to.be('visible')
                 done();
             }, 0);
         });
 
         it('滚动到元素临界位置多一像素', function(done) {
-            Fixed(element, setTop);
+            var _element = Fixed(element, setTop);
             $(document).scrollTop(elementTop+1);
             setTimeout(function() {
                 expect(element.css('position')).to.be(ie6?'absolute':'fixed');
+                expect(element.css('visibility')).to.be('hidden')
+                expect(_element.css('visibility')).to.be('visible')
                 done();
             }, 0);
         });
 
         it('滚动到元素临界位置多300像素', function(done) {
-            Fixed(element, setTop);
+            var _element = Fixed(element, setTop);
             $(document).scrollTop(elementTop+300);
             setTimeout(function() {
                 expect(element.css('position')).to.be(ie6?'absolute':'fixed');
+                expect(element.css('visibility')).to.be('hidden')
+                expect(_element.css('visibility')).to.be('visible')
                 done();
             }, 0);
         });
@@ -79,11 +85,14 @@ define(function(require) {
         });
 
         it('重复绑定', function(done) {
-            Fixed(element, setTop);
-            Fixed(element, setTop + 100);   // 将无效
+            var _element;
+            _element = Fixed(element, setTop);
+            _element = Fixed(element, setTop + 100);   // 将无效
             $(document).scrollTop(elementTop + 50);
             setTimeout(function() {
                 expect(element.css('position')).to.be(ie6?'absolute':'fixed');
+                expect(element.css('visibility')).to.be('hidden')
+                expect(_element.css('visibility')).to.be('visible')
                 done();
             }, 0);
         });
