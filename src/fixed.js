@@ -77,7 +77,7 @@ define(function(require, exports, module) {
         scrollFn();
         // 监听滚动事件
         // fixed 是本模块绑定的滚动事件的命名空间
-        doc.on('scroll', scrollFn);
+        $(window).on('scroll', scrollFn);
         element.data('bind-fixed', true);
     };
 

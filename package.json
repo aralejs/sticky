@@ -1,6 +1,6 @@
 {
     "name": "fixed",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "root": "arale",
     "tag": "utility",
     "description": "实现元素跟随滚动的效果。",

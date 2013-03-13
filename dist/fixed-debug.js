@@ -1,4 +1,4 @@
-define("arale/fixed/1.0.0/fixed-debug", [ "$-debug" ], function(require, exports, module) {
+define("arale/fixed/1.0.1/fixed-debug", [ "$-debug" ], function(require, exports, module) {
     var $ = require("$-debug");
     // 用于保存可能修改到的样式
     var originStyles = {
@@ -67,7 +67,7 @@ define("arale/fixed/1.0.0/fixed-debug", [ "$-debug" ], function(require, exports
         scrollFn();
         // 监听滚动事件
         // fixed 是本模块绑定的滚动事件的命名空间
-        doc.on("scroll", scrollFn);
+        $(window).on("scroll", scrollFn);
         element.data("bind-fixed", true);
     };
     module.exports = Fixed;
