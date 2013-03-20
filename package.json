@@ -1,8 +1,8 @@
 {
+    "family": "arale",
     "name": "fixed",
     "version": "1.0.1",
-    "root": "arale",
-    "tag": "utility",
+    "keywords": ["utility"],
     "description": "实现元素跟随滚动的效果。",
     "homepage": "http://aralejs.org/fixed/",
     "repository": {
@@ -13,11 +13,14 @@
         "url": "https://github.com/aralejs/fixed/issues"
     },
     "license": "MIT",
-    "dependencies": {
-        "$": "$"
+    "spm": {
+        "alias": {
+            "$": "$"
+        },
+        "devAlias": {
+            "$": "jquery/jquery/1.7.2/jquery"
+        },
+        "output": ["fixed.js"]
     },
-    "tests": ["fixed"],
-    "output": {
-        "fixed.js": "."
-    }
+    "tests": ["fixed"]
 }
