@@ -2,7 +2,7 @@
 
 ---
 
-[![Build Status](https://secure.travis-ci.org/aralejs/fixed.png)](https://travis-ci.org/aralejs/fixed)
+[![Build Status](https://travis-ci.org/aralejs/fixed.png?branch=master)](https://travis-ci.org/aralejs/fixed)
 
 实现侧边栏跟随滚动的效果，当滚动条滚动到一定距离时，指定区域变为 fixed 效果开始跟随页面。
 
