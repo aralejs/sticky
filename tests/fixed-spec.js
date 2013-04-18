@@ -2,12 +2,13 @@ define(function(require) {
 
     //mocha.setup({ignoreLeaks: true});
 
-    var Fixed = require('../src/fixed');
+    var expect = require('expect');
+    var Fixed = require('fixed');
     var $ = require('$');
     var element = null;
     var setTop = 50;
     var elementTop;
-    var ie6 = $.browser.msie && $.browser.version == 6.0;    
+    var ie6 = $.browser.msie && $.browser.version == 6.0;
 
     describe('fixed', function() {
 
@@ -27,7 +28,7 @@ define(function(require) {
         });
 
         it('滚动了一像素', function(done) {
-            var originPosition = element.css('position');            
+            var originPosition = element.css('position');
             Fixed(element, setTop);
             $(document).scrollTop(1);
             setTimeout(function() {
@@ -72,7 +73,7 @@ define(function(require) {
                 done();
             }, 0);
         });
-        
+
         it('效率检查', function() {
             Fixed(element, setTop);
             Fixed(element, setTop);

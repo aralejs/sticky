@@ -17,9 +17,6 @@
         "alias": {
             "$": "$"
         },
-        "devAlias": {
-            "$": "jquery/jquery/1.7.2/jquery"
-        },
         "output": ["fixed.js"]
     },
     "tests": ["fixed"]
