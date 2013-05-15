@@ -12,13 +12,23 @@
     line-height: 300px;
 }
 #test {
+    position: -webkit-sticky;
+    position: -ms-sticky;
+    position: -o-sticky;
+    position: -moz-sticky;
+    position: sticky;
+
+    top: 30px;
+
     background: #08c;
     color: #fff;
     width: 300px;
     height: 40px;
     line-height: 40px;
     z-index: 1;
-    text-align: center;    
+    text-align: center;
+
+
 }
 </style>
 
@@ -28,8 +38,25 @@
 
 
 ````javascript
-seajs.use('fixed', function(Fixed){
+
+/*seajs.use('fixed', function(Fixed){
     Fixed('#test', 30);
+});*/
+seajs.use("sticky", function(sticky) {
+    var fix = new sticky.stick({
+        element: "#test",
+        marginTop: 30
+    });
+    fix.on("afterFixed", function(e) {
+        console.log("afterFixed");
+    });
+    fix.on("afterSticky", function(e) {
+        console.log("afterSticky");
+    });
+    fix.on("afterRestored", function(e) {
+        console.log("afterRestored");
+    });
+    fix.render();
 });
 ````
     
