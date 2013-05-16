@@ -56,10 +56,7 @@
 ````javascript
 seajs.use(["$", "sticky"], function($, sticky) {
     // sticky
-    sticky.stick({
-        element: "#stick",
-        marginTop: 30
-    }).on("stick", function(e) {
+    sticky.stick("#stick", 30).on("stick", function(e) {
         seajs.log("stick");
     }).on("restored", function(e) {
         seajs.log("restored");
@@ -67,23 +64,13 @@ seajs.use(["$", "sticky"], function($, sticky) {
 
     // fixed
     $('<div id="gotop">回到顶部</div>').appendTo("body");
-    sticky.fix({
-        element: "#gotop"
-    }).on("fixed", function(e) {
-        seajs.log("fixed");
-    }).on("restored", function(e) {
-        seajs.log("restored");
-    }).render();
+    sticky.fix("#gotop");
 
     $('<div id="nav">顶层fixed导航</div>').appendTo("body");
-    sticky.fix({
-        element: "#nav"
-    }).render();
+    sticky.fix("#nav");
 
     $('<div id="bottom">footer fixed</div>').appendTo("body");
-    sticky.fix({
-        element: "#bottom"
-    }).render();
+    sticky.fix("#bottom");
 });
 ````
     

@@ -1,11 +1,15 @@
 define(function (require, exports, module) {
 
     var $ = require("$"),
-        Events = require('events');
+        Events = require('events'),
+        utils = require("./utils");
 
     var doc = $(document),
-        guid = 0, // 用于记录 placeholder 累计 id
-        stickyPrefix = ["-webkit-", "-ms-", "-o-", "-moz-", ""];
+        guid = 0;// 用于记录 placeholder 累计 id;
+
+    var isPositionFixedSupported = utils.checkPositionFixedSupported(),
+        isPositionStickySupported = utils.checkPositionStickySupported(),
+        stickyPrefix = utils.stickyPrefix;
 
     /**
      * Fixed
@@ -22,6 +26,7 @@ define(function (require, exports, module) {
 
         self.options = options;
     }
+
     Events.mixTo(Fixed);
 
     Fixed.prototype.render = function () {
@@ -54,7 +59,7 @@ define(function (require, exports, module) {
 
         // 监听滚动事件
         // fixed 是本模块绑定的滚动事件的命名空间
-        $(window).on('scroll', function () {
+        $(window).on('scroll', function () {  // todo: resize?
             if (!elem.is(':visible')) return;
             scrollFn();
         });
@@ -82,7 +87,7 @@ define(function (require, exports, module) {
             });
             elem.data('_fixed', true);
 
-            self.trigger("fixed stick", elem);
+            self.trigger("stick", elem);
         } else if (elem.data('_fixed') && distance > marginTop) {
             self._restore();
         }
@@ -107,23 +112,23 @@ define(function (require, exports, module) {
             });
             elem.data('_fixed', true);
 
-            self.trigger("fixed stick", elem);
+            self.trigger("stick", elem);
         } else if (elem.data('_fixed') && distance > marginTop) {
             self._restore();
         }
     };
-    Fixed.prototype._restore = function() {
+    Fixed.prototype._restore = function () {
         var self = this,
             elem = self.elem;
 
-            removePlaceholder(elem);
-            // 恢复原有的样式
-            elem.css(self._originStyles);
-            elem.data('_fixed', false);
+        removePlaceholder(elem);
+        // 恢复原有的样式
+        elem.css(self._originStyles);
+        elem.data('_fixed', false);
 
-            self.trigger("restored", elem);
+        self.trigger("restored", elem);
     };
-    Fixed.prototype.destory = function() {
+    Fixed.prototype.destory = function () {
         var self = this;
 
         self.off();
@@ -147,9 +152,10 @@ define(function (require, exports, module) {
 
         self.options = options;
     }
+
     Events.mixTo(Sticky);
 
-    Sticky.prototype.render = function() {
+    Sticky.prototype.render = function () {
         var self = this,
             elem = self.elem = $(self.options.element),
             tmp = "";
@@ -198,7 +204,7 @@ define(function (require, exports, module) {
         }
     };
 
-    Sticky.prototype.destory = function() {
+    Sticky.prototype.destory = function () {
         var self = this;
 
         self.off();
@@ -239,88 +245,21 @@ define(function (require, exports, module) {
     function removePlaceholder(elem) {
         // 如果后面有占位符的话, 删除掉
         var placeholder = elem.data("placeholder_id");
-        placeholder!== undefined && elem.next("#arale_fixed_placeholder_" + placeholder).remove();
+        placeholder !== undefined && elem.next("#arale_fixed_placeholder_" + placeholder).remove();
     }
 
-    // https://github.com/RubyLouvre/detectPositionFixed/blob/master/index.js
-    var isPositionFixedSupported = (function () {
-        var positionfixed = false;
-
-        var test = document.createElement('div'),
-            control = test.cloneNode(false),
-            fake = false,
-            root = document.body || (function () {
-                fake = true;
-                return document.documentElement.appendChild(document.createElement('body'));
-            }());
-
-        var oldCssText = root.style.cssText;
-        root.style.cssText = 'padding:0;margin:0';
-        test.style.cssText = 'position:fixed;top:42px';
-        root.appendChild(test);
-        root.appendChild(control);
-
-        positionfixed = test.offsetTop !== control.offsetTop;
-
-        root.removeChild(test);
-        root.removeChild(control);
-        root.style.cssText = oldCssText;
-
-        if (fake) {
-            document.documentElement.removeChild(root);
-        }
-        return positionfixed;
-    })();
-
-    var isPositionStickySupported = (function () {
-        var container = doc[0].body;
-
-        if (doc[0].createElement && container && container.appendChild && container.removeChild) {
-            var isSupported,
-                el = doc[0].createElement("div"),
-                getStyle = function (st) {
-                    if (window.getComputedStyle) {
-                        return window.getComputedStyle(el).getPropertyValue(st);
-                    } else {
-                        return el.currentStyle.getAttribute(st);
-                    }
-                };
-
-            container.appendChild(el);
-
-            for (var i = 0; i < stickyPrefix.length; i++) {
-                el.style.cssText = "position:" + stickyPrefix[i] + "sticky;visibility:hidden;";
-                if (isSupported = getStyle("position").indexOf("sticky") !== -1) break;
-            }
-
-            container.removeChild(el);
-            return isSupported;
-        }
-
-        return null;
-    })();
-
-    var throttle = function (fn, ms, context) {
-        ms = ms || 150;
-
-        if (ms === -1) {
-            return (function () {
-                fn.apply(context || this, arguments);
-            });
-        }
-
-        var last = $.now();
-
-        return (function () {
-            var now = $.now();
-            if (now - last > ms) {
-                last = now;
-                fn.apply(context || this, arguments);
-            }
-        });
-    };
     return {
-        stick: isPositionStickySupported ? Sticky : Fixed,
-        fix: Fixed
+        stick: function (elem, marginTop) {
+            var actual = isPositionStickySupported ? Sticky : Fixed;
+            return (new actual({
+                element: elem,
+                marginTop: marginTop
+            }));
+        },
+        fix: function (elem) {
+            return (new Fixed({
+                element: elem
+            })).render();
+        }
     };
 });

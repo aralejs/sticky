@@ -1,16 +1,16 @@
 {
     "family": "arale",
-    "name": "fixed",
-    "version": "1.0.1",
+    "name": "sticky",
+    "version": "1.1.0",
     "keywords": ["utility"],
     "description": "实现元素跟随滚动的效果。",
-    "homepage": "http://aralejs.org/fixed/",
+    "homepage": "http://aralejs.org/sticky/",
     "repository": {
         "type": "git",
-        "url": "https://github.com/aralejs/fixed"
+        "url": "https://github.com/aralejs/sticky"
     },
     "bugs": {
-        "url": "https://github.com/aralejs/fixed/issues"
+        "url": "https://github.com/aralejs/sticky/issues"
     },
     "license": "MIT",
     "spm": {
@@ -18,7 +18,7 @@
             "$": "$",
             "events": "arale/events/1.1.0/events"
         },
-        "output": ["fixed.js"]
+        "output": ["sticky.js"]
     },
-    "tests": ["fixed"]
+    "tests": ["sticky"]
 }

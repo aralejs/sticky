@@ -4,8 +4,12 @@
 
 ## 1.1.0
 
-`tag:new` 增加 fixed (设置 fixed 之后) 和 restored (取消 fixed 之后) 两个回调函数.
-`tag:new` 提供占位.
+`tag:changed` 拆分成两个接口, Sticky.stick 和 Sticky.fixed
+
+`tag:new` sticky 增加 stick (设置 stick 之后) 和 restored (取消 stick 之后) 两个事件.
+
+`tag:new` 根据需要提供占位.
+
 `tag:improved` 判断 IE6 改进.
 
 ## 1.0.1

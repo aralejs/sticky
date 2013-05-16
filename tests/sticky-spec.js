@@ -88,9 +88,7 @@ define(function (require) {
         it('fixed 元素, 滚动 500 像素', function (done) {
             var oldTop = element.offset().top;
 
-            var obj = Sticky.fix({
-                element: element
-            }).render();
+            var obj = Sticky.fix(element);
 
             $(document).scrollTop(500);
 
@@ -102,77 +100,36 @@ define(function (require) {
                 done();
 
                 obj.destory();
-            }, 0);
+            }, 10);
         });
         it('不需要占位符的 fixed 元素', function (done) {
             element.css("float", "left");
 
-            var obj = Sticky.fix({
-                element: element
-            }).render();
+            var obj = Sticky.fix(element);
             $(document).scrollTop(500);
 
             setTimeout(function () {
                 expect(element.next().length).to.be(0);
                 done();
                 obj.destory();
-            }, 0);
+            }, 10);
 
-        });
-        it('fixed/restored 事件触发', function (done) {
-            var triggered = 0;
-            element.css({
-                position: "absolute",
-                top: 100
-            });
-            var obj = Sticky.fix({
-                element: element
-            }).on("fixed",function () {
-                    triggered = 1;
-                }).render();
-
-            $(document).scrollTop(500);
-
-            setTimeout(function () {
-                expect(triggered).to.be(1);
-                $(document).scrollTop(0);
-
-                setTimeout(function () {
-                    expect(triggered).to.be(1);
-
-                    done();
-                    obj.destory();
-                }, 0);
-
-            }, 0);
         });
 
         it('重复绑定', function (done) {
-            var triggered = 0;
+            var obj1 = Sticky.fix(element);
 
-            var obj1 = new Sticky.fix({
-                element: element
-            });
-            obj1.on("fixed",function () {
-                    triggered = 1;
-                }).render();
-
-            var obj2 = Sticky.fix({
-                element: element
-            });
-            obj2.on("fixed",function () {
-                    triggered = 2;
-                }).render();
+            var obj2 = Sticky.fix(element);
 
             $(document).scrollTop(500);
 
             setTimeout(function () {
-                expect(triggered).to.be(1);
+                expect(element.data("bind-fixed")).to.be(true);
+                expect(obj2).to.be(undefined);
                 done();
 
                 obj1.destory();
-                obj2.destory();
-            }, 0);
+            }, 10);
         });
     });
 
@@ -194,39 +151,38 @@ define(function (require) {
 
         it('滚动了一像素', function (done) {
             var originPosition = element.css('position');
-            var obj = Sticky.stick({
-                element: element,
-                marginTop: setTop
-            }).render();
+            var obj = Sticky.stick(element, setTop).render();
             $(document).scrollTop(1);
 
             setTimeout(function () {
-                expect(element.css('position')).to.be(originPosition);
+                if (isPositionStickySupported) {
+                    expect(element.css('position').indexOf("sticky") !== -1).to.be(true);
+                } else {
+                    expect(element.css('position')).to.be(originPosition);
+                }
                 done();
                 obj.destory();
-            }, 0);
+            }, 10);
         });
 
         it('滚动到差一像素', function (done) {
             var originPosition = element.css('position');
-            var obj = Sticky.stick({
-                element: element,
-                marginTop: setTop
-            }).render();
+            var obj = Sticky.stick(element, setTop).render();
             $(document).scrollTop(elementTop - 1);
 
             setTimeout(function () {
-                expect(element.css('position')).to.be(originPosition);
+                if (isPositionStickySupported) {
+                    expect(element.css('position').indexOf("sticky") !== -1).to.be(true);
+                } else {
+                    expect(element.css('position')).to.be(originPosition);
+                }
                 done();
                 obj.destory();
-            }, 0);
+            }, 10);
         });
 
         it('滚动到元素临界位置', function (done) {
-            var obj = Sticky.stick({
-                element: element,
-                marginTop: setTop
-            }).render();
+            var obj = Sticky.stick(element, setTop).render();
             $(document).scrollTop(elementTop);
 
             setTimeout(function () {
@@ -239,14 +195,11 @@ define(function (require) {
                 }
                 done();
                 obj.destory();
-            }, 0);
+            }, 10);
         });
 
         it('滚动到元素临界位置多一像素', function (done) {
-            var obj = Sticky.stick({
-                element: element,
-                marginTop: setTop
-            }).render();
+            var obj = Sticky.stick(element, setTop).render();
             $(document).scrollTop(elementTop + 1);
 
             setTimeout(function () {
@@ -259,15 +212,12 @@ define(function (require) {
                 }
                 done();
                 obj.destory();
-            }, 0);
+            }, 10);
 
         });
 
         it('滚动到元素临界位置多300像素', function (done) {
-            var obj = Sticky.stick({
-                element: element,
-                marginTop: setTop
-            }).render();
+            var obj = Sticky.stick(element, setTop).render();
             $(document).scrollTop(elementTop + 300);
 
             setTimeout(function () {
@@ -280,16 +230,13 @@ define(function (require) {
                 }
                 done();
                 obj.destory();
-            }, 0);
+            }, 10);
         });
 
         it('stick/restored 事件触发', function (done) {
             var triggered = 0;
 
-            var obj = Sticky.stick({
-                element: element,
-                marginTop: setTop
-            }).on("stick",function () {
+            var obj = Sticky.stick(element, setTop).on("stick",function () {
                     triggered = 1;
                 }).on("restored",function () {
                     triggered = 2;
@@ -305,23 +252,18 @@ define(function (require) {
                     expect(triggered).to.be(2);
                     done();
                     obj.destory();
-                }, 0);
-            }, 0);
+                }, 10);
+            }, 10);
         });
 
         it('重复绑定', function (done) {
             var triggered = 0;
 
-            var obj1 = new Sticky.stick({
-                element: element,
-                marginTop: setTop
-            });
+            var obj1 = Sticky.stick(element, setTop);
             obj1.on("stick",function () {
                     triggered = 1;
                 }).render();
-            var obj2 = Sticky.stick({
-                element: element
-            });
+            var obj2 = Sticky.stick(element, setTop);
             obj2.on("stick",function () {
                     triggered = 2;
                 }).render();
@@ -335,7 +277,7 @@ define(function (require) {
 
                 obj1.destory();
                 obj2.destory();
-            }, 0);
+            }, 10);
         });
     });
 
