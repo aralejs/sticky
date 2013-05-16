@@ -16,11 +16,12 @@
     color: #fff;
     width: 300px;
     height: 40px;
+
     line-height: 40px;
     z-index: 1;
     text-align: center;
 }
-#nav, #gotop {
+#nav, #gotop, #bottom {
     position: absolute;
     height: 30px;
     line-height: 30px;
@@ -40,6 +41,11 @@
     width: 100%;
 
 }
+#bottom {
+    width: 100%;
+    left: 0;
+    bottom: 0;
+}
 </style>
 
 <div class="help">撑高度的元素。</div>
@@ -51,26 +57,32 @@
 seajs.use(["$", "sticky"], function($, sticky) {
     // sticky
     sticky.stick({
-        element: "#stick"
-    }).on("afterSticky", function(e) {
-        console.log("stick");
-    }).on("afterRestored", function(e) {
-        console.log("restored");
+        element: "#stick",
+        marginTop: 30
+    }).on("stick", function(e) {
+        seajs.log("stick");
+    }).on("restored", function(e) {
+        seajs.log("restored");
     }).render();
 
     // fixed
     $('<div id="gotop">回到顶部</div>').appendTo("body");
     sticky.fix({
         element: "#gotop"
-    }).on("afterFixed", function(e) {
-        console.log("fixed");
-    }).on("afterRestored", function(e) {
-        console.log("restored");
+    }).on("fixed", function(e) {
+        seajs.log("fixed");
+    }).on("restored", function(e) {
+        seajs.log("restored");
     }).render();
 
     $('<div id="nav">顶层fixed导航</div>').appendTo("body");
     sticky.fix({
         element: "#nav"
+    }).render();
+
+    $('<div id="bottom">footer fixed</div>').appendTo("body");
+    sticky.fix({
+        element: "#bottom"
     }).render();
 });
 ````

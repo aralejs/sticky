@@ -46,6 +46,7 @@ define(function (require, exports, module) {
                 self._originStyles[style] = elem.css(style);
             }
         }
+
         var scrollFn = isPositionFixedSupported ? $.proxy(self._supportFixed, self) : $.proxy(self._supportAbsolute, self);
 
         // 先运行一次
@@ -53,11 +54,13 @@ define(function (require, exports, module) {
 
         // 监听滚动事件
         // fixed 是本模块绑定的滚动事件的命名空间
-        $(window).on('scroll', throttle(function () {
+        $(window).on('scroll', function () {
             if (!elem.is(':visible')) return;
             scrollFn();
-        }, 200));
+        });
         elem.data('bind-fixed', true);
+
+        return self;
     };
     Fixed.prototype._supportFixed = function () {
         var self = this,
@@ -71,19 +74,17 @@ define(function (require, exports, module) {
         // 当距离小于等于预设的值时
         // 将元素设为 fix 状态
         if (!elem.data('_fixed') && distance <= marginTop) {
+            addPlaceholder(elem);
+
             elem.css({
                 position: 'fixed',
                 top: marginTop
             });
             elem.data('_fixed', true);
 
-            _afterFixed(elem, self);
+            self.trigger("fixed stick", elem);
         } else if (elem.data('_fixed') && distance > marginTop) {
-            // 恢复原有的样式
-            elem.css(self._originStyles);
-            elem.data('_fixed', false);
-
-            _afterRestored(elem, self);
+            self._restore();
         }
     };
     Fixed.prototype._supportAbsolute = function () {
@@ -98,20 +99,35 @@ define(function (require, exports, module) {
         // 当距离小于等于预设的值时
         // 将元素设为 fix 状态
         if (distance <= marginTop) {
+            addPlaceholder(elem);
+
             elem.css({
                 position: 'absolute',
                 top: marginTop + doc.scrollTop()
             });
             elem.data('_fixed', true);
 
-            _afterFixed(elem, self);
+            self.trigger("fixed stick", elem);
         } else if (elem.data('_fixed') && distance > marginTop) {
+            self._restore();
+        }
+    };
+    Fixed.prototype._restore = function() {
+        var self = this,
+            elem = self.elem;
+
+            removePlaceholder(elem);
             // 恢复原有的样式
             elem.css(self._originStyles);
             elem.data('_fixed', false);
 
-            _afterRestored(elem, self);
-        }
+            self.trigger("restored", elem);
+    };
+    Fixed.prototype.destory = function() {
+        var self = this;
+
+        self.off();
+        removePlaceholder(self.elem);
     };
 
 
@@ -154,12 +170,14 @@ define(function (require, exports, module) {
         // 和 fixed 一致, 滚动时两个触发事件
         self._supportSticky();
 
-        $(window).on('scroll', throttle(function () {
+        $(window).on('scroll', function () {
             if (!elem.is(':visible')) return;
             self._supportSticky();
-        }, 200));
+        });
 
         elem.data('bind-fixed', true);
+
+        return self;
     };
     Sticky.prototype._supportSticky = function () {
         var self = this,
@@ -171,23 +189,22 @@ define(function (require, exports, module) {
 
         if (!elem.data('_fixed') && distance <= marginTop) {
             elem.data('_fixed', true);
-
-            _afterSticky(elem, self);
+            // 支持 position: sticky 的是不需要占位符的
+            self.trigger("stick", elem);
         } else if (elem.data('_fixed') && distance > marginTop) {
             elem.data('_fixed', false);
 
-            _afterRestored(elem, self);
+            self.trigger("restored", elem);
         }
     };
 
+    Sticky.prototype.destory = function() {
+        var self = this;
 
-    function getActualStyle(el, st) {
-        if (window.getComputedStyle) {
-            return window.getComputedStyle(el).getPropertyValue(st);
-        } else {
-            return el.currentStyle.getAttribute(st);
-        }
-    }
+        self.off();
+        removePlaceholder(self.elem);
+    };
+
 
     function indexOf(array, item) {
         if (array == null) return -1;
@@ -200,74 +217,59 @@ define(function (require, exports, module) {
 
     // 需要占位符的情况有: position: static or relative; 但除了:
     // 1) !display: block; 2) float: left or right
-    function needPlaceholder(elem) {
-        var ret = false,
-            flt = getActualStyle(elem, "float"),
-            position = getActualStyle(elem, "position"),
-            display = getActualStyle(elem, "display");
+    function addPlaceholder(elem) {
+        var need = false,
+            flt = elem.css("float"),
+            position = elem.css("position"),
+            display = elem.css("display");
 
-        if (indexOf(["static", "relative"], position) !== -1) ret = true;
-        if (indexOf(["left", "right"], flt) !== -1 || display !== "block") ret = false;
+        if (indexOf(["static", "relative"], position) !== -1) need = true;
+        if (indexOf(["left", "right"], flt) !== -1 || display !== "block") need = false;
 
-        return ret;
-    }
-
-
-    function _afterFixed(elem, self) {
-        if (needPlaceholder(elem[0])) {
+        if (need) {
             // 添加占位符
-            var placeholder = $('<div id="_arale_fixed_placeholder_' + guid + '" style="visibility: hidden;margin:0;padding:0;"></div>');
+            var placeholder = $('<div id="arale_fixed_placeholder_' + guid + '" style="visibility: hidden;margin:0;padding:0;"></div>');
             placeholder.width(elem.outerWidth(true))
                 .height(elem.outerHeight(true));
 
-            elem.after(placeholder).data("_placeholder_id", guid++);
+            elem.data("placeholder_id", guid++).after(placeholder);
         }
-        self.trigger("fixed", elem);
     }
 
-    // 支持 position: sticky 的是不需要占位符的
-    function _afterSticky(elem, self) {
-        self.trigger("stick", elem);
-    }
-
-    function _afterRestored(elem, self) {
+    function removePlaceholder(elem) {
         // 如果后面有占位符的话, 删除掉
-        var placeholder = elem.data("_placeholder_id");
-        placeholder && elem.next("#_arale_fixed_placeholder_" + placeholder).remove();
-
-        self.trigger("restored", elem);
+        var placeholder = elem.data("placeholder_id");
+        placeholder!== undefined && elem.next("#arale_fixed_placeholder_" + placeholder).remove();
     }
 
-    // From: http://kangax.github.com/cft/#IS_POSITION_FIXED_SUPPORTED
+    // https://github.com/RubyLouvre/detectPositionFixed/blob/master/index.js
     var isPositionFixedSupported = (function () {
-        var container = doc[0].body;
+        var positionfixed = false;
 
-        if (doc[0].createElement && container && container.appendChild && container.removeChild) {
-            var el = doc[0].createElement('div');
+        var test = document.createElement('div'),
+            control = test.cloneNode(false),
+            fake = false,
+            root = document.body || (function () {
+                fake = true;
+                return document.documentElement.appendChild(document.createElement('body'));
+            }());
 
-            if (!el.getBoundingClientRect) return null;
+        var oldCssText = root.style.cssText;
+        root.style.cssText = 'padding:0;margin:0';
+        test.style.cssText = 'position:fixed;top:42px';
+        root.appendChild(test);
+        root.appendChild(control);
 
-            el.innerHTML = 'x';
-            el.style.cssText = 'position:fixed;top:100px;';
-            container.appendChild(el);
+        positionfixed = test.offsetTop !== control.offsetTop;
 
-            var originalHeight = container.style.height,
-                originalScrollTop = container.scrollTop;
+        root.removeChild(test);
+        root.removeChild(control);
+        root.style.cssText = oldCssText;
 
-            container.style.height = '3000px';
-            container.scrollTop = 500;
-
-            var elementTop = el.getBoundingClientRect().top;
-            container.style.height = originalHeight;
-
-            var isSupported = (elementTop === 100);
-            container.removeChild(el);
-            container.scrollTop = originalScrollTop;
-
-            return isSupported;
+        if (fake) {
+            document.documentElement.removeChild(root);
         }
-
-        return null;
+        return positionfixed;
     })();
 
     var isPositionStickySupported = (function () {
@@ -275,13 +277,20 @@ define(function (require, exports, module) {
 
         if (doc[0].createElement && container && container.appendChild && container.removeChild) {
             var isSupported,
-                el = doc[0].createElement("div");
+                el = doc[0].createElement("div"),
+                getStyle = function (st) {
+                    if (window.getComputedStyle) {
+                        return window.getComputedStyle(el).getPropertyValue(st);
+                    } else {
+                        return el.currentStyle.getAttribute(st);
+                    }
+                };
 
             container.appendChild(el);
 
             for (var i = 0; i < stickyPrefix.length; i++) {
                 el.style.cssText = "position:" + stickyPrefix[i] + "sticky;visibility:hidden;";
-                if (isSupported = getActualStyle(el, "position").indexOf("sticky") !== -1) break;
+                if (isSupported = getStyle("position").indexOf("sticky") !== -1) break;
             }
 
             container.removeChild(el);
@@ -310,7 +319,6 @@ define(function (require, exports, module) {
             }
         });
     };
-
     return {
         stick: isPositionStickySupported ? Sticky : Fixed,
         fix: Fixed
