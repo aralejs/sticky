@@ -31,7 +31,7 @@
     text-align: center;
 }
 #gotop {
-    top: 800px;
+    bottom: 50px;
     right: 10px;
     width: 80px;
 }
