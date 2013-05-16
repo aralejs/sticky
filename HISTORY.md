@@ -4,13 +4,15 @@
 
 ## 1.1.0
 
-`tag:changed` 拆分成两个接口, Sticky.stick 和 Sticky.fixed
+`tag:changed` 组件由 `arale/fixed` 改名为 `arale/sticky`。
 
-`tag:new` sticky 增加 stick (设置 stick 之后) 和 restored (取消 stick 之后) 两个事件.
+`tag:changed` 拆分成两个接口 Sticky.stick 和 Sticky.fix 。
 
-`tag:new` 根据需要提供占位.
+`tag:new` [#1](https://github.com/aralejs/sticky/issues/1) 增加 stickd (设置 stick 之后) 和 restored (取消 stick 之后) 两个事件。
 
-`tag:improved` 判断 IE6 改进.
+`tag:new` [#6](https://github.com/aralejs/sticky/issues/6) 根据需要提供占位元素。
+
+`tag:improved` [#3](https://github.com/aralejs/sticky/issues/3) 判断 IE6 的方式改进。
 
 ## 1.0.1
 
