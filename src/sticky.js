@@ -4,8 +4,7 @@ define(function (require, exports, module) {
         Events = require('events'),
         utils = require("./utils");
 
-    var doc = $(document),
-        guid = 0;// 用于记录 placeholder 累计 id;
+    var doc = $(document);
 
     var isPositionFixedSupported = utils.checkPositionFixedSupported(),
         isPositionStickySupported = utils.checkPositionStickySupported(),
@@ -20,9 +19,9 @@ define(function (require, exports, module) {
     function Fixed(options) {
         var self = this;
 
-        if (!(self instanceof Fixed)) {
+        /*if (!(self instanceof Fixed)) {
             return new Fixed(options);
-        }
+        }*/
 
         self.options = options;
     }
@@ -59,7 +58,7 @@ define(function (require, exports, module) {
 
         // 监听滚动事件
         // fixed 是本模块绑定的滚动事件的命名空间
-        $(window).on('scroll', function () {  // todo: resize?
+        $(window).on('scroll', function () {
             if (!elem.is(':visible')) return;
             scrollFn();
         });
@@ -79,7 +78,7 @@ define(function (require, exports, module) {
         // 当距离小于等于预设的值时
         // 将元素设为 fix 状态
         if (!elem.data('_fixed') && distance <= marginTop) {
-            addPlaceholder(elem);
+            self._addPlaceholder();
 
             elem.css({
                 position: 'fixed',
@@ -104,7 +103,7 @@ define(function (require, exports, module) {
         // 当距离小于等于预设的值时
         // 将元素设为 fix 状态
         if (distance <= marginTop) {
-            addPlaceholder(elem);
+            self._addPlaceholder();
 
             elem.css({
                 position: 'absolute',
@@ -121,18 +120,47 @@ define(function (require, exports, module) {
         var self = this,
             elem = self.elem;
 
-        removePlaceholder(elem);
+        self._removePlaceholder();
         // 恢复原有的样式
         elem.css(self._originStyles);
         elem.data('_fixed', false);
 
         self.trigger("restored", elem);
     };
+
+    // 需要占位符的情况有: 1) position: static or relative;但除了:
+    // 1) !display: block;
+    Fixed.prototype._addPlaceholder = function() {
+        var self = this,
+            elem = self.elem;
+
+        var need = false,
+            flt = elem.css("float"),
+            position = elem.css("position"),
+            display = elem.css("display");
+
+        if (utils.indexOf(["static", "relative"], position) !== -1) need = true;
+        if (display !== "block") need = false;
+
+        if (need) {
+            // 添加占位符
+            self._placeholder = $('<div style="visibility: hidden;margin:0;padding:0;"></div>');
+            self._placeholder.width(elem.outerWidth(true))
+                .height(elem.outerHeight(true))
+                .css("float", flt).insertAfter(elem);
+        }
+    };
+    Fixed.prototype._removePlaceholder = function() {
+        var self = this;
+
+        // 如果后面有占位符的话, 删除掉
+        self._placeholder && self._placeholder.remove();
+    };
     Fixed.prototype.destory = function () {
         var self = this;
 
         self.off();
-        removePlaceholder(self.elem);
+        self._removePlaceholder();
     };
 
 
@@ -145,10 +173,6 @@ define(function (require, exports, module) {
      */
     function Sticky(options) {
         var self = this;
-
-        if (!(self instanceof Sticky)) {
-            return new Sticky(options);
-        }
 
         self.options = options;
     }
@@ -205,48 +229,9 @@ define(function (require, exports, module) {
     };
 
     Sticky.prototype.destory = function () {
-        var self = this;
-
-        self.off();
-        removePlaceholder(self.elem);
+        this.off();
     };
 
-
-    function indexOf(array, item) {
-        if (array == null) return -1;
-        var nativeIndexOf = Array.prototype;
-
-        if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
-        for (var i = 0; i < array.length; i++) if (array[i] === item) return i;
-        return -1;
-    }
-
-    // 需要占位符的情况有: position: static or relative; 但除了:
-    // 1) !display: block; 2) float: left or right
-    function addPlaceholder(elem) {
-        var need = false,
-            flt = elem.css("float"),
-            position = elem.css("position"),
-            display = elem.css("display");
-
-        if (indexOf(["static", "relative"], position) !== -1) need = true;
-        if (indexOf(["left", "right"], flt) !== -1 || display !== "block") need = false;
-
-        if (need) {
-            // 添加占位符
-            var placeholder = $('<div id="arale_fixed_placeholder_' + guid + '" style="visibility: hidden;margin:0;padding:0;"></div>');
-            placeholder.width(elem.outerWidth(true))
-                .height(elem.outerHeight(true));
-
-            elem.data("placeholder_id", guid++).after(placeholder);
-        }
-    }
-
-    function removePlaceholder(elem) {
-        // 如果后面有占位符的话, 删除掉
-        var placeholder = elem.data("placeholder_id");
-        placeholder !== undefined && elem.next("#arale_fixed_placeholder_" + placeholder).remove();
-    }
 
     return {
         stick: function (elem, marginTop) {

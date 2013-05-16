@@ -20,7 +20,7 @@
 
 ### Sticky.stick(element, marginTop)
 
-````javascript
+```javascript
 seajs.use(["$", "sticky"], function($, sticky) {
     sticky.stick("#stick", 30).on("stick", function(e) {
         seajs.log("stick");
@@ -39,7 +39,7 @@ seajs.use(["$", "sticky"], function($, sticky) {
 
 ### Sticky.fixed(element)
 
-````javascript
+```javascript
 seajs.use(["$", "sticky"], function($, sticky) {
     $('<div id="gotop">回到顶部</div>').appendTo("body");
     sticky.fix("#gotop");
@@ -50,7 +50,7 @@ seajs.use(["$", "sticky"], function($, sticky) {
     $('<div id="bottom">footer fixed</div>').appendTo("body");
     sticky.fix("#bottom");
 });
-````
+```
 
 `element` 是指需要 fixed 的目标元素，接受 jQuery selector 对象。
 

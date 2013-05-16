@@ -96,20 +96,33 @@ define(function (require) {
 
                 expect(element.css('position')).to.be(isPositionFixedSupported ? 'fixed' : 'absolute');
                 expect(element.offset().top).to.be(oldTop + 500);
-                expect(element.next().attr("id").indexOf("arale_fixed_placeholder_")).to.be(0);
+                expect(obj._placeholder.length).to.be(1);
                 done();
 
                 obj.destory();
             }, 10);
         });
         it('不需要占位符的 fixed 元素', function (done) {
+            element.css("position", "absolute");
+
+            var obj = Sticky.fix(element);
+            $(document).scrollTop(500);
+
+            setTimeout(function () {
+                expect(obj._placeholder).to.be(undefined);
+                done();
+                obj.destory();
+            }, 10);
+
+        });
+        it('float: left 时', function (done) {
             element.css("float", "left");
 
             var obj = Sticky.fix(element);
             $(document).scrollTop(500);
 
             setTimeout(function () {
-                expect(element.next().length).to.be(0);
+                expect(obj._placeholder.length).to.be(1);
                 done();
                 obj.destory();
             }, 10);

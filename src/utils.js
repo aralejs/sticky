@@ -1,24 +1,24 @@
 define(function (require, exports, module) {
 
-    var doc = document,
-        stickyPrefix = ["-webkit-", "-ms-", "-o-", "-moz-", ""];
+    var $ = require("$"),
 
-    // https://github.com/RubyLouvre/detectPositionFixed/blob/master/index.js
+        doc = document,
+        stickyPrefix = ["-webkit-", "-ms-", "-o-", "-moz-", ""];
 
     var _now = Date.now || function () {
         return +new Date();
     };
+
     return {
+        // https://github.com/RubyLouvre/detectPositionFixed/blob/master/index.js
         checkPositionFixedSupported: function () {
-            var positionfixed = false;
+            if ($.browser.msie && $.browser.version == 6.0) return false;
+
+            var positionfixed;
 
             var test = document.createElement('div'),
                 control = test.cloneNode(false),
-                fake = false,
-                root = document.body || (function () {
-                    fake = true;
-                    return document.documentElement.appendChild(document.createElement('body'));
-                }());
+                root = document.body;
 
             var oldCssText = root.style.cssText;
             root.style.cssText = 'padding:0;margin:0';
@@ -28,16 +28,15 @@ define(function (require, exports, module) {
 
             positionfixed = test.offsetTop !== control.offsetTop;
 
-            root.removeChild(test);
-            root.removeChild(control);
+            test.parentNode.removeChild(test);
+            control.parentNode.removeChild(control);
             root.style.cssText = oldCssText;
 
-            if (fake) {
-                document.documentElement.removeChild(root);
-            }
             return positionfixed;
         },
         checkPositionStickySupported: function () {
+            if ($.browser.msie) return false;
+
             var container = doc.body;
 
             if (doc.createElement && container && container.appendChild && container.removeChild) {
@@ -58,11 +57,11 @@ define(function (require, exports, module) {
                     if (isSupported = getStyle("position").indexOf("sticky") !== -1) break;
                 }
 
-                container.removeChild(el);
+                el.parentNode.removeChild(el);
                 return isSupported;
             }
 
-            return null;
+            return false;
         },
         throttle: function (fn, ms, context) {
             ms = ms || 150;
@@ -82,6 +81,14 @@ define(function (require, exports, module) {
                     fn.apply(context || this, arguments);
                 }
             });
+        },
+        indexOf: function (array, item) {
+            if (array == null) return -1;
+            var nativeIndexOf = Array.prototype;
+
+            if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
+            for (var i = 0; i < array.length; i++) if (array[i] === item) return i;
+            return -1;
         },
         stickyPrefix: stickyPrefix
     }

@@ -1,7 +1,6 @@
 define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/events-debug", "./utils-debug" ], function(require, exports, module) {
     var $ = require("$-debug"), Events = require("arale/events/1.1.0/events-debug"), utils = require("./utils-debug");
-    var doc = $(document), guid = 0;
-    // 用于记录 placeholder 累计 id;
+    var doc = $(document);
     var isPositionFixedSupported = utils.checkPositionFixedSupported(), isPositionStickySupported = utils.checkPositionStickySupported(), stickyPrefix = utils.stickyPrefix;
     /**
      * Fixed
@@ -11,9 +10,9 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
      */
     function Fixed(options) {
         var self = this;
-        if (!(self instanceof Fixed)) {
+        /*if (!(self instanceof Fixed)) {
             return new Fixed(options);
-        }
+        }*/
         self.options = options;
     }
     Events.mixTo(Fixed);
@@ -40,7 +39,6 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
         // 监听滚动事件
         // fixed 是本模块绑定的滚动事件的命名空间
         $(window).on("scroll", function() {
-            // todo: resize?
             if (!elem.is(":visible")) return;
             scrollFn();
         });
@@ -54,7 +52,7 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
         // 当距离小于等于预设的值时
         // 将元素设为 fix 状态
         if (!elem.data("_fixed") && distance <= marginTop) {
-            addPlaceholder(elem);
+            self._addPlaceholder();
             elem.css({
                 position: "fixed",
                 top: marginTop
@@ -72,7 +70,7 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
         // 当距离小于等于预设的值时
         // 将元素设为 fix 状态
         if (distance <= marginTop) {
-            addPlaceholder(elem);
+            self._addPlaceholder();
             elem.css({
                 position: "absolute",
                 top: marginTop + doc.scrollTop()
@@ -85,16 +83,34 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
     };
     Fixed.prototype._restore = function() {
         var self = this, elem = self.elem;
-        removePlaceholder(elem);
+        self._removePlaceholder();
         // 恢复原有的样式
         elem.css(self._originStyles);
         elem.data("_fixed", false);
         self.trigger("restored", elem);
     };
+    // 需要占位符的情况有: 1) position: static or relative;但除了:
+    // 1) !display: block;
+    Fixed.prototype._addPlaceholder = function() {
+        var self = this, elem = self.elem;
+        var need = false, flt = elem.css("float"), position = elem.css("position"), display = elem.css("display");
+        if (utils.indexOf([ "static", "relative" ], position) !== -1) need = true;
+        if (display !== "block") need = false;
+        if (need) {
+            // 添加占位符
+            self._placeholder = $('<div style="visibility: hidden;margin:0;padding:0;"></div>');
+            self._placeholder.width(elem.outerWidth(true)).height(elem.outerHeight(true)).css("float", flt).insertAfter(elem);
+        }
+    };
+    Fixed.prototype._removePlaceholder = function() {
+        var self = this;
+        // 如果后面有占位符的话, 删除掉
+        self._placeholder && self._placeholder.remove();
+    };
     Fixed.prototype.destory = function() {
         var self = this;
         self.off();
-        removePlaceholder(self.elem);
+        self._removePlaceholder();
     };
     /**
      * Sticky
@@ -105,9 +121,6 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
      */
     function Sticky(options) {
         var self = this;
-        if (!(self instanceof Sticky)) {
-            return new Sticky(options);
-        }
         self.options = options;
     }
     Events.mixTo(Sticky);
@@ -144,35 +157,8 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
         }
     };
     Sticky.prototype.destory = function() {
-        var self = this;
-        self.off();
-        removePlaceholder(self.elem);
+        this.off();
     };
-    function indexOf(array, item) {
-        if (array == null) return -1;
-        var nativeIndexOf = Array.prototype;
-        if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
-        for (var i = 0; i < array.length; i++) if (array[i] === item) return i;
-        return -1;
-    }
-    // 需要占位符的情况有: position: static or relative; 但除了:
-    // 1) !display: block; 2) float: left or right
-    function addPlaceholder(elem) {
-        var need = false, flt = elem.css("float"), position = elem.css("position"), display = elem.css("display");
-        if (indexOf([ "static", "relative" ], position) !== -1) need = true;
-        if (indexOf([ "left", "right" ], flt) !== -1 || display !== "block") need = false;
-        if (need) {
-            // 添加占位符
-            var placeholder = $('<div id="arale_fixed_placeholder_' + guid + '" style="visibility: hidden;margin:0;padding:0;"></div>');
-            placeholder.width(elem.outerWidth(true)).height(elem.outerHeight(true));
-            elem.data("placeholder_id", guid++).after(placeholder);
-        }
-    }
-    function removePlaceholder(elem) {
-        // 如果后面有占位符的话, 删除掉
-        var placeholder = elem.data("placeholder_id");
-        placeholder !== undefined && elem.next("#arale_fixed_placeholder_" + placeholder).remove();
-    }
     return {
         stick: function(elem, marginTop) {
             var actual = isPositionStickySupported ? Sticky : Fixed;
@@ -189,34 +175,30 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
     };
 });
 
-define("arale/sticky/1.1.0/utils-debug", [], function(require, exports, module) {
-    var doc = document, stickyPrefix = [ "-webkit-", "-ms-", "-o-", "-moz-", "" ];
-    // https://github.com/RubyLouvre/detectPositionFixed/blob/master/index.js
+define("arale/sticky/1.1.0/utils-debug", [ "$-debug" ], function(require, exports, module) {
+    var $ = require("$-debug"), doc = document, stickyPrefix = [ "-webkit-", "-ms-", "-o-", "-moz-", "" ];
     var _now = Date.now || function() {
         return +new Date();
     };
     return {
+        // https://github.com/RubyLouvre/detectPositionFixed/blob/master/index.js
         checkPositionFixedSupported: function() {
-            var positionfixed = false;
-            var test = document.createElement("div"), control = test.cloneNode(false), fake = false, root = document.body || function() {
-                fake = true;
-                return document.documentElement.appendChild(document.createElement("body"));
-            }();
+            if ($.browser.msie && $.browser.version == 6) return false;
+            var positionfixed;
+            var test = document.createElement("div"), control = test.cloneNode(false), root = document.body;
             var oldCssText = root.style.cssText;
             root.style.cssText = "padding:0;margin:0";
             test.style.cssText = "position:fixed;top:42px";
             root.appendChild(test);
             root.appendChild(control);
             positionfixed = test.offsetTop !== control.offsetTop;
-            root.removeChild(test);
-            root.removeChild(control);
+            test.parentNode.removeChild(test);
+            control.parentNode.removeChild(control);
             root.style.cssText = oldCssText;
-            if (fake) {
-                document.documentElement.removeChild(root);
-            }
             return positionfixed;
         },
         checkPositionStickySupported: function() {
+            if ($.browser.msie) return false;
             var container = doc.body;
             if (doc.createElement && container && container.appendChild && container.removeChild) {
                 var isSupported, el = doc.createElement("div"), getStyle = function(st) {
@@ -231,10 +213,10 @@ define("arale/sticky/1.1.0/utils-debug", [], function(require, exports, module) 
                     el.style.cssText = "position:" + stickyPrefix[i] + "sticky;visibility:hidden;";
                     if (isSupported = getStyle("position").indexOf("sticky") !== -1) break;
                 }
-                container.removeChild(el);
+                el.parentNode.removeChild(el);
                 return isSupported;
             }
-            return null;
+            return false;
         },
         throttle: function(fn, ms, context) {
             ms = ms || 150;
@@ -251,6 +233,13 @@ define("arale/sticky/1.1.0/utils-debug", [], function(require, exports, module) 
                     fn.apply(context || this, arguments);
                 }
             };
+        },
+        indexOf: function(array, item) {
+            if (array == null) return -1;
+            var nativeIndexOf = Array.prototype;
+            if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
+            for (var i = 0; i < array.length; i++) if (array[i] === item) return i;
+            return -1;
         },
         stickyPrefix: stickyPrefix
     };
