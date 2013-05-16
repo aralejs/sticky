@@ -11,15 +11,7 @@
     text-align: center;
     line-height: 300px;
 }
-#test {
-    position: -webkit-sticky;
-    position: -ms-sticky;
-    position: -o-sticky;
-    position: -moz-sticky;
-    position: sticky;
-
-    top: 30px;
-
+#stick {
     background: #08c;
     color: #fff;
     width: 300px;
@@ -27,36 +19,59 @@
     line-height: 40px;
     z-index: 1;
     text-align: center;
-
+}
+#nav, #gotop {
+    position: absolute;
+    height: 30px;
+    line-height: 30px;
+    background: #08c;
+    color: #fff;
+    z-index: 10;
+    text-align: center;
+}
+#gotop {
+    top: 800px;
+    right: 10px;
+    width: 80px;
+}
+#nav {
+    left: 0;
+    top: 0;
+    width: 100%;
 
 }
 </style>
 
 <div class="help">撑高度的元素。</div>
 
-<div id="test">跟随滚动的测试元素。</div>
+<div id="stick">跟随滚动的测试元素。</div>
 
 
 ````javascript
+seajs.use(["$", "sticky"], function($, sticky) {
+    // sticky
+    sticky.stick({
+        element: "#stick"
+    }).on("afterSticky", function(e) {
+        console.log("stick");
+    }).on("afterRestored", function(e) {
+        console.log("restored");
+    }).render();
 
-/*seajs.use('fixed', function(Fixed){
-    Fixed('#test', 30);
-});*/
-seajs.use("sticky", function(sticky) {
-    var fix = new sticky.stick({
-        element: "#test",
-        marginTop: 30
-    });
-    fix.on("afterFixed", function(e) {
-        console.log("afterFixed");
-    });
-    fix.on("afterSticky", function(e) {
-        console.log("afterSticky");
-    });
-    fix.on("afterRestored", function(e) {
-        console.log("afterRestored");
-    });
-    fix.render();
+    // fixed
+    $('<div id="gotop">回到顶部</div>').appendTo("body");
+    sticky.fix({
+        element: "#gotop"
+    }).on("afterFixed", function(e) {
+        console.log("fixed");
+    }).on("afterRestored", function(e) {
+        console.log("restored");
+    }).render();
+
+    $('<div id="nav">顶层fixed导航</div>').appendTo("body");
+    sticky.fix({
+        element: "#nav"
+    }).render();
 });
 ````
     

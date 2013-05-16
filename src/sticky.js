@@ -14,7 +14,13 @@ define(function (require, exports, module) {
      *      options.element: Selector
      */
     function Fixed(options) {
-        this.options = options;
+        var self = this;
+
+        if (!(self instanceof Fixed)) {
+            return new Fixed(options);
+        }
+
+        self.options = options;
     }
     Events.mixTo(Fixed);
 
@@ -117,7 +123,13 @@ define(function (require, exports, module) {
      *      options.marginTop: Number
      */
     function Sticky(options) {
-        this.options = options;
+        var self = this;
+
+        if (!(self instanceof Sticky)) {
+            return new Sticky(options);
+        }
+
+        self.options = options;
     }
     Events.mixTo(Sticky);
 
@@ -134,10 +146,10 @@ define(function (require, exports, module) {
         self.marginTop = $.isNumeric(self.options.marginTop) ? Math.min(self.options.marginTop, self._originTop) : self._originTop;
 
         for (var i = 0; i < stickyPrefix.length; i++) {
-            tmp = "position:" + stickyPrefix[i] + "sticky;";
+            tmp += "position:" + stickyPrefix[i] + "sticky;";
         }
 
-        elem[0].style.cssText += tmp + "top: " + self.marginTop + ";";
+        elem[0].style.cssText += tmp + "top: " + self.marginTop + "px;";
 
         // 和 fixed 一致, 滚动时两个触发事件
         self._supportSticky();
@@ -169,32 +181,63 @@ define(function (require, exports, module) {
     };
 
 
+    function getActualStyle(el, st) {
+        if (window.getComputedStyle) {
+            return window.getComputedStyle(el).getPropertyValue(st);
+        } else {
+            return el.currentStyle.getAttribute(st);
+        }
+    }
+
+    function indexOf(array, item) {
+        if (array == null) return -1;
+        var nativeIndexOf = Array.prototype;
+
+        if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
+        for (var i = 0; i < array.length; i++) if (array[i] === item) return i;
+        return -1;
+    }
+
+    // 需要占位符的情况有: position: static or relative; 但除了:
+    // 1) !display: block; 2) float: left or right
+    function needPlaceholder(elem) {
+        var ret = false,
+            flt = getActualStyle(elem, "float"),
+            position = getActualStyle(elem, "position"),
+            display = getActualStyle(elem, "display");
+
+        if (indexOf(["static", "relative"], position) !== -1) ret = true;
+        if (indexOf(["left", "right"], flt) !== -1 || display !== "block") ret = false;
+
+        return ret;
+    }
 
 
     function _afterFixed(elem, self) {
-        // todo: 有时不需要占位符
-        // 添加占位符
-        var placeholder = $('<div id="_arale_fixed_placeholder_' + guid + '" style="visibility: hidden;margin:0;padding:0;"></div>');
-        placeholder.width(elem.outerWidth(true))
-            .height(elem.outerHeight(true));
+        if (needPlaceholder(elem[0])) {
+            // 添加占位符
+            var placeholder = $('<div id="_arale_fixed_placeholder_' + guid + '" style="visibility: hidden;margin:0;padding:0;"></div>');
+            placeholder.width(elem.outerWidth(true))
+                .height(elem.outerHeight(true));
 
-        elem.after(placeholder).data("_placeholder_id", guid++);
-
-        self.trigger("afterFixed", elem);
+            elem.after(placeholder).data("_placeholder_id", guid++);
+        }
+        self.trigger("fixed", elem);
     }
 
     // 支持 position: sticky 的是不需要占位符的
     function _afterSticky(elem, self) {
-
-        self.trigger("afterSticky", elem);
+        self.trigger("stick", elem);
     }
 
     function _afterRestored(elem, self) {
         // 如果后面有占位符的话, 删除掉
-        elem.next("#_arale_fixed_placeholder_" + elem.data("_placeholder_id")).remove();
+        var placeholder = elem.data("_placeholder_id");
+        placeholder && elem.next("#_arale_fixed_placeholder_" + placeholder).remove();
 
-        self.trigger("afterRestored", elem);
+        self.trigger("restored", elem);
     }
+
     // From: http://kangax.github.com/cft/#IS_POSITION_FIXED_SUPPORTED
     var isPositionFixedSupported = (function () {
         var container = doc[0].body;
@@ -232,22 +275,13 @@ define(function (require, exports, module) {
 
         if (doc[0].createElement && container && container.appendChild && container.removeChild) {
             var isSupported,
-                el = doc[0].createElement("div"),
-                has = function (val) {
-                    var actual = "";
-                    if (window.getComputedStyle) {
-                        actual = window.getComputedStyle(el).getPropertyValue("position");
-                    } else {
-                        actual = el.currentStyle.getAttribute("position");
-                    }
-                    return actual.indexOf(val) !== -1;
-                };
+                el = doc[0].createElement("div");
 
             container.appendChild(el);
 
             for (var i = 0; i < stickyPrefix.length; i++) {
                 el.style.cssText = "position:" + stickyPrefix[i] + "sticky;visibility:hidden;";
-                if (isSupported = has("sticky")) break;
+                if (isSupported = getActualStyle(el, "position").indexOf("sticky") !== -1) break;
             }
 
             container.removeChild(el);
