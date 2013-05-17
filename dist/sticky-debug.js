@@ -176,11 +176,11 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
 });
 
 define("arale/sticky/1.1.0/utils-debug", [ "$-debug" ], function(require, exports, module) {
-    var $ = require("$-debug"), doc = document, stickyPrefix = [ "-webkit-", "-ms-", "-o-", "-moz-", "" ], isIE678 = !doc.addEventListener, isIE6 = isIE678 && !("maxHeight" in doc.body.style);
+    var $ = require("$-debug"), doc = document, stickyPrefix = [ "-webkit-", "-ms-", "-o-", "-moz-", "" ], ua = (window.navigator.userAgent || "").toLowerCase(), isIE = ua.indexOf("msie") !== -1, isIE6 = ua.indexOf("msie 6") !== -1;
     return {
         // https://github.com/RubyLouvre/detectPositionFixed/blob/master/index.js
         checkPositionFixedSupported: function() {
-            if (isIE678 && isIE6 == 6) return false;
+            if (isIE6 == 6) return false;
             var positionfixed;
             var test = document.createElement("div"), control = test.cloneNode(false), root = document.body;
             var oldCssText = root.style.cssText;
@@ -195,7 +195,7 @@ define("arale/sticky/1.1.0/utils-debug", [ "$-debug" ], function(require, export
             return positionfixed;
         },
         checkPositionStickySupported: function() {
-            if (isIE678) return false;
+            if (isIE) return false;
             var container = doc.body;
             if (doc.createElement && container && container.appendChild && container.removeChild) {
                 var isSupported, el = doc.createElement("div"), getStyle = function(st) {

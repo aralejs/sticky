@@ -5,13 +5,14 @@ define(function (require, exports, module) {
         doc = document,
         stickyPrefix = ["-webkit-", "-ms-", "-o-", "-moz-", ""],
 
-        isIE678 = !doc.addEventListener,
-        isIE6 = isIE678 && !('maxHeight' in doc.body.style);
+        ua = (window.navigator.userAgent || "").toLowerCase(),
+        isIE = ua.indexOf("msie") !== -1,
+        isIE6 = ua.indexOf("msie 6") !== -1;
 
     return {
         // https://github.com/RubyLouvre/detectPositionFixed/blob/master/index.js
         checkPositionFixedSupported: function () {
-            if (isIE678 && isIE6 == 6.0) return false;
+            if (isIE6 == 6.0) return false;
 
             var positionfixed;
 
@@ -34,7 +35,7 @@ define(function (require, exports, module) {
             return positionfixed;
         },
         checkPositionStickySupported: function () {
-            if (isIE678) return false;
+            if (isIE) return false;
 
             var container = doc.body;
 
