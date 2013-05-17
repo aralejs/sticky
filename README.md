@@ -54,8 +54,8 @@ seajs.use(["$", "sticky"], function($, sticky) {
 
 `element` 是指需要 fixed 的目标元素，接受 jQuery selector 对象。
 
-> 注意: 请自行设置元素的 `left, top` 等 CSS 属性。
-
+> 注意: 1) 请自行设置元素的 `left, top` 等 CSS 属性。
+>      2) **Sticky 对某些情况下的元素会向 DOM 中插入占位元素, 所以务必在 DOM ready 之后初始化该组件**
 
 ##  `1.0.1`使用说明
 
