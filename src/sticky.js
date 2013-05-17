@@ -128,7 +128,7 @@ define(function (require, exports, module) {
         self.trigger("restored", elem);
     };
 
-    // 需要占位符的情况有: 1) position: static or relative;但除了:
+    // 需要占位符的情况有: 1) position: static or relative; 但除了:
     // 1) !display: block;
     Fixed.prototype._addPlaceholder = function() {
         var self = this,
@@ -197,7 +197,7 @@ define(function (require, exports, module) {
 
         elem[0].style.cssText += tmp + "top: " + self.marginTop + "px;";
 
-        // 和 fixed 一致, 滚动时两个触发事件
+        // 和 fixed 一致, 滚动时两个触发事件, 如果不需要事件的话, 下面的代码都可以删掉...
         self._supportSticky();
 
         $(window).on('scroll', function () {

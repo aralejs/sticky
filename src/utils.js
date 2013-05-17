@@ -5,6 +5,7 @@ define(function (require, exports, module) {
         doc = document,
         stickyPrefix = ["-webkit-", "-ms-", "-o-", "-moz-", ""],
 
+        // 只需判断是否是 IE 和 IE6
         ua = (window.navigator.userAgent || "").toLowerCase(),
         isIE = ua.indexOf("msie") !== -1,
         isIE6 = ua.indexOf("msie 6") !== -1;
@@ -12,7 +13,7 @@ define(function (require, exports, module) {
     return {
         // https://github.com/RubyLouvre/detectPositionFixed/blob/master/index.js
         checkPositionFixedSupported: function () {
-            if (isIE6 == 6.0) return false;
+            if (isIE6) return false;
 
             var positionfixed;
 

@@ -89,7 +89,7 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
         elem.data("_fixed", false);
         self.trigger("restored", elem);
     };
-    // 需要占位符的情况有: 1) position: static or relative;但除了:
+    // 需要占位符的情况有: 1) position: static or relative; 但除了:
     // 1) !display: block;
     Fixed.prototype._addPlaceholder = function() {
         var self = this, elem = self.elem;
@@ -135,7 +135,7 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
             tmp += "position:" + stickyPrefix[i] + "sticky;";
         }
         elem[0].style.cssText += tmp + "top: " + self.marginTop + "px;";
-        // 和 fixed 一致, 滚动时两个触发事件
+        // 和 fixed 一致, 滚动时两个触发事件, 如果不需要事件的话, 下面的代码都可以删掉... 
         self._supportSticky();
         $(window).on("scroll", function() {
             if (!elem.is(":visible")) return;
@@ -176,11 +176,12 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
 });
 
 define("arale/sticky/1.1.0/utils-debug", [ "$-debug" ], function(require, exports, module) {
-    var $ = require("$-debug"), doc = document, stickyPrefix = [ "-webkit-", "-ms-", "-o-", "-moz-", "" ], ua = (window.navigator.userAgent || "").toLowerCase(), isIE = ua.indexOf("msie") !== -1, isIE6 = ua.indexOf("msie 6") !== -1;
+    var $ = require("$-debug"), doc = document, stickyPrefix = [ "-webkit-", "-ms-", "-o-", "-moz-", "" ], // 只需判断是否是 IE 和 IE6
+    ua = (window.navigator.userAgent || "").toLowerCase(), isIE = ua.indexOf("msie") !== -1, isIE6 = ua.indexOf("msie 6") !== -1;
     return {
         // https://github.com/RubyLouvre/detectPositionFixed/blob/master/index.js
         checkPositionFixedSupported: function() {
-            if (isIE6 == 6) return false;
+            if (isIE6) return false;
             var positionfixed;
             var test = document.createElement("div"), control = test.cloneNode(false), root = document.body;
             var oldCssText = root.style.cssText;
