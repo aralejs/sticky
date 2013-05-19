@@ -233,18 +233,18 @@ define(function (require, exports, module) {
     };
 
 
-    return {
-        stick: function (elem, marginTop) {
-            var actual = isPositionStickySupported ? Sticky : Fixed;
-            return (new actual({
-                element: elem,
-                marginTop: marginTop
-            }));
-        },
-        fix: function (elem) {
-            return (new Fixed({
-                element: elem
-            })).render();
-        }
-    };
+    function stick(elem, marginTop) {
+        var actual = isPositionStickySupported ? Sticky : Fixed;
+        return (new actual({
+            element: elem,
+            marginTop: marginTop
+        }));
+    }
+    stick.stick = stick;
+    stick.fix =  function (elem) {
+        return (new Fixed({
+            element: elem
+        })).render();
+    }
+    module.exports = stick;
 });
