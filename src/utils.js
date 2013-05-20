@@ -66,7 +66,7 @@ define(function (require, exports, module) {
         },
         indexOf: function (array, item) {
             if (array == null) return -1;
-            var nativeIndexOf = Array.prototype;
+            var nativeIndexOf = Array.prototype.indexOf;
 
             if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
             for (var i = 0; i < array.length; i++) if (array[i] === item) return i;

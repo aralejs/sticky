@@ -135,7 +135,7 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
             tmp += "position:" + stickyPrefix[i] + "sticky;";
         }
         elem[0].style.cssText += tmp + "top: " + self.marginTop + "px;";
-        // 和 fixed 一致, 滚动时两个触发事件, 如果不需要事件的话, 下面的代码都可以删掉... 
+        // 和 fixed 一致, 滚动时两个触发事件, 如果不需要事件的话, 下面的代码都可以删掉...
         self._supportSticky();
         $(window).on("scroll", function() {
             if (!elem.is(":visible")) return;
@@ -159,20 +159,20 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
     Sticky.prototype.destory = function() {
         this.off();
     };
-    return {
-        stick: function(elem, marginTop) {
-            var actual = isPositionStickySupported ? Sticky : Fixed;
-            return new actual({
-                element: elem,
-                marginTop: marginTop
-            });
-        },
-        fix: function(elem) {
-            return new Fixed({
-                element: elem
-            }).render();
-        }
+    function stick(elem, marginTop) {
+        var actual = isPositionStickySupported ? Sticky : Fixed;
+        return new actual({
+            element: elem,
+            marginTop: marginTop
+        });
+    }
+    stick.stick = stick;
+    stick.fix = function(elem) {
+        return new Fixed({
+            element: elem
+        }).render();
     };
+    module.exports = stick;
 });
 
 define("arale/sticky/1.1.0/utils-debug", [ "$-debug" ], function(require, exports, module) {
@@ -218,7 +218,7 @@ define("arale/sticky/1.1.0/utils-debug", [ "$-debug" ], function(require, export
         },
         indexOf: function(array, item) {
             if (array == null) return -1;
-            var nativeIndexOf = Array.prototype;
+            var nativeIndexOf = Array.prototype.indexOf;
             if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
             for (var i = 0; i < array.length; i++) if (array[i] === item) return i;
             return -1;
