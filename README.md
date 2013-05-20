@@ -9,14 +9,13 @@
 
 例如 [brunch.io](http://brunch.io/) 和 [bootstrap](http://twitter.github.com/bootstrap/getting-started.html) 页面左边侧边栏的效果，或着请看 [演示](/sticky/examples/)。
 
-相似组件：[博客侧边栏跟随滚动效果](http://www.neoease.com/sidebar-follow-scrolling-section/) 。
-
 实现原理是支持 `position: sticky` 的直接使用 CSS 实现, 不支持的浏览器(除 IE6 外)使用 `position: fixed`，对 IE6 进行 js 模拟。
+
+> 原 `arale/fixed` 改名为 `arale/sticky`，原有的调用方式见下文。
 
 ---
 
-## `1.1.0` 使用说明
-
+## 使用说明 `1.1.0`
 
 ### Sticky.stick(element, marginTop)
 
@@ -57,7 +56,7 @@ seajs.use(["$", "sticky"], function($, sticky) {
 > 注意: 1) 请自行设置元素的 `left, top` 等 CSS 属性。
 >      2) **Sticky 对某些情况下的元素会向 DOM 中插入占位元素, 所以务必在 DOM ready 之后初始化该组件**
 
-##  `1.0.1`使用说明
+## 使用说明 `1.0.1`
 
 这是一个工具模块，只提供一个接收两个参数的方法`Fixed`。
 
