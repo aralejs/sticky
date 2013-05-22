@@ -38,10 +38,22 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
         scrollFn();
         // 监听滚动事件
         // fixed 是本模块绑定的滚动事件的命名空间
-        $(window).on("scroll", function() {
-            if (!elem.is(":visible")) return;
-            scrollFn();
-        });
+        if (isPositionFixedSupported) {
+            $(window).on("scroll", function() {
+                if (!elem.is(":visible")) return;
+                scrollFn();
+            });
+        } else {
+            var timer = null;
+            $(window).on("scroll", function() {
+                timer && clearTimeout(timer);
+                timer = setTimeout(function() {
+                    if (!elem.is(":visible")) return;
+                    scrollFn();
+                    timer = null;
+                }, 100);
+            });
+        }
         elem.data("bind-fixed", true);
         return self;
     };

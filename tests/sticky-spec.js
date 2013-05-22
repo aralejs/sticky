@@ -9,65 +9,10 @@ define(function (require) {
     var setTop = 50;
     var elementTop;
 
-    var doc = $(document),
-        isPositionStickySupported = (function () {
-            var stickyPrefix = ["-webkit-", "-ms-", "-o-", "-moz-", ""],
-                container = doc[0].body;
+    var utils = require("../src/utils");
 
-            if (doc[0].createElement && container && container.appendChild && container.removeChild) {
-                var isSupported,
-                    el = doc[0].createElement("div"),
-                    getStyle = function (st) {
-                        if (window.getComputedStyle) {
-                            return window.getComputedStyle(el).getPropertyValue(st);
-                        } else {
-                            return el.currentStyle.getAttribute(st);
-                        }
-                    };
-
-                container.appendChild(el);
-
-                for (var i = 0; i < stickyPrefix.length; i++) {
-                    el.style.cssText = "position:" + stickyPrefix[i] + "sticky;visibility:hidden;";
-                    if (isSupported = getStyle("position").indexOf("sticky") !== -1) break;
-                }
-
-                container.removeChild(el);
-                return isSupported;
-            }
-
-            return null;
-        })(),
-        isPositionFixedSupported = (function () {
-            var positionfixed = false;
-
-            new function () {
-                var test = document.createElement('div'),
-                    control = test.cloneNode(false),
-                    fake = false,
-                    root = document.body || (function () {
-                        fake = true;
-                        return document.documentElement.appendChild(document.createElement('body'));
-                    }());
-
-                var oldCssText = root.style.cssText;
-                root.style.cssText = 'padding:0;margin:0';
-                test.style.cssText = 'position:fixed;top:42px';
-                root.appendChild(test);
-                root.appendChild(control);
-
-                positionfixed = test.offsetTop !== control.offsetTop;
-
-                root.removeChild(test);
-                root.removeChild(control);
-                root.style.cssText = oldCssText;
-
-                if (fake) {
-                    document.documentElement.removeChild(root);
-                }
-            };
-            return positionfixed;
-        })();
+    var isPositionStickySupported = utils.checkPositionStickySupported(),
+        isPositionFixedSupported = utils.checkPositionFixedSupported();
 
 
     describe('Sticky.fix', function () {
@@ -100,7 +45,7 @@ define(function (require) {
                 done();
 
                 obj.destory();
-            }, 10);
+            }, 120);
         });
         it('不需要占位符的 fixed 元素', function (done) {
             element.css("position", "absolute");
@@ -112,7 +57,7 @@ define(function (require) {
                 expect(obj._placeholder).to.be(undefined);
                 done();
                 obj.destory();
-            }, 10);
+            }, 120);
 
         });
         it('float: left 时', function (done) {
@@ -125,7 +70,7 @@ define(function (require) {
                 expect(obj._placeholder.length).to.be(1);
                 done();
                 obj.destory();
-            }, 10);
+            }, 120);
 
         });
 
@@ -142,7 +87,7 @@ define(function (require) {
                 done();
 
                 obj1.destory();
-            }, 10);
+            }, 120);
         });
     });
 
@@ -175,7 +120,7 @@ define(function (require) {
                 }
                 done();
                 obj.destory();
-            }, 10);
+            }, 120);
         });
 
         it('滚动到差一像素', function (done) {
@@ -191,7 +136,7 @@ define(function (require) {
                 }
                 done();
                 obj.destory();
-            }, 10);
+            }, 120);
         });
 
         it('滚动到元素临界位置', function (done) {
@@ -208,7 +153,7 @@ define(function (require) {
                 }
                 done();
                 obj.destory();
-            }, 10);
+            }, 120);
         });
 
         it('滚动到元素临界位置多一像素', function (done) {
@@ -225,7 +170,7 @@ define(function (require) {
                 }
                 done();
                 obj.destory();
-            }, 10);
+            }, 120);
 
         });
 
@@ -243,7 +188,7 @@ define(function (require) {
                 }
                 done();
                 obj.destory();
-            }, 10);
+            }, 120);
         });
 
         it('stick/restored 事件触发', function (done) {
@@ -265,8 +210,8 @@ define(function (require) {
                     expect(triggered).to.be(2);
                     done();
                     obj.destory();
-                }, 10);
-            }, 10);
+                }, 120);
+            }, 120);
         });
 
         it('重复绑定', function (done) {
@@ -290,7 +235,7 @@ define(function (require) {
 
                 obj1.destory();
                 obj2.destory();
-            }, 10);
+            }, 120);
         });
     });
 
