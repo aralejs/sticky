@@ -60,5 +60,3 @@ seajs.use(["$", "sticky"], function($, sticky) {
 
 > 注意: 请自行设置元素的 `left, top` 等 CSS 属性。
 
-
-
