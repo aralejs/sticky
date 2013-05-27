@@ -1,7 +1,6 @@
 define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/events-debug", "./utils-debug" ], function(require, exports, module) {
     var $ = require("$-debug"), Events = require("arale/events/1.1.0/events-debug"), utils = require("./utils-debug");
     var doc = $(document);
-    var isPositionFixedSupported = utils.checkPositionFixedSupported(), isPositionStickySupported = utils.checkPositionStickySupported(), stickyPrefix = utils.stickyPrefix;
     /**
      * Fixed
      * @param options
@@ -33,7 +32,7 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
                 self._originStyles[style] = elem.css(style);
             }
         }
-        var scrollFn = isPositionFixedSupported ? $.proxy(self._supportFixed, self) : $.proxy(self._supportAbsolute, self);
+        var isPositionFixedSupported = utils.checkPositionFixedSupported(), scrollFn = isPositionFixedSupported ? $.proxy(self._supportFixed, self) : $.proxy(self._supportAbsolute, self);
         // 先运行一次
         scrollFn();
         // 监听滚动事件
@@ -143,8 +142,8 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
         // 记录元素原来的位置
         self._originTop = elem.offset().top;
         self.marginTop = $.isNumeric(self.options.marginTop) ? Math.min(self.options.marginTop, self._originTop) : self._originTop;
-        for (var i = 0; i < stickyPrefix.length; i++) {
-            tmp += "position:" + stickyPrefix[i] + "sticky;";
+        for (var i = 0; i < utils.stickyPrefix.length; i++) {
+            tmp += "position:" + utils.stickyPrefix[i] + "sticky;";
         }
         elem[0].style.cssText += tmp + "top: " + self.marginTop + "px;";
         // 和 fixed 一致, 滚动时两个触发事件, 如果不需要事件的话, 下面的代码都可以删掉...
@@ -172,7 +171,7 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
         this.off();
     };
     function stick(elem, marginTop) {
-        var actual = isPositionStickySupported ? Sticky : Fixed;
+        var actual = utils.checkPositionStickySupported() ? Sticky : Fixed;
         return new actual({
             element: elem,
             marginTop: marginTop
@@ -184,6 +183,8 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/event
             element: elem
         }).render();
     };
+    // 便于写测试用例
+    stick.utils = utils;
     module.exports = stick;
 });
 

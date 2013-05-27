@@ -6,10 +6,6 @@ define(function (require, exports, module) {
 
     var doc = $(document);
 
-    var isPositionFixedSupported = utils.checkPositionFixedSupported(),
-        isPositionStickySupported = utils.checkPositionStickySupported(),
-        stickyPrefix = utils.stickyPrefix;
-
     /**
      * Fixed
      * @param options
@@ -51,7 +47,8 @@ define(function (require, exports, module) {
             }
         }
 
-        var scrollFn = isPositionFixedSupported ? $.proxy(self._supportFixed, self) : $.proxy(self._supportAbsolute, self);
+        var isPositionFixedSupported = utils.checkPositionFixedSupported(),
+            scrollFn = isPositionFixedSupported ? $.proxy(self._supportFixed, self) : $.proxy(self._supportAbsolute, self);
 
         // 先运行一次
         scrollFn();
@@ -206,8 +203,8 @@ define(function (require, exports, module) {
         self._originTop = elem.offset().top;
         self.marginTop = $.isNumeric(self.options.marginTop) ? Math.min(self.options.marginTop, self._originTop) : self._originTop;
 
-        for (var i = 0; i < stickyPrefix.length; i++) {
-            tmp += "position:" + stickyPrefix[i] + "sticky;";
+        for (var i = 0; i < utils.stickyPrefix.length; i++) {
+            tmp += "position:" + utils.stickyPrefix[i] + "sticky;";
         }
 
         elem[0].style.cssText += tmp + "top: " + self.marginTop + "px;";
@@ -249,7 +246,8 @@ define(function (require, exports, module) {
 
 
     function stick(elem, marginTop) {
-        var actual = isPositionStickySupported ? Sticky : Fixed;
+        var actual = utils.checkPositionStickySupported() ? Sticky : Fixed;
+
         return (new actual({
             element: elem,
             marginTop: marginTop
@@ -260,6 +258,10 @@ define(function (require, exports, module) {
         return (new Fixed({
             element: elem
         })).render();
-    }
+    };
+
+    // 便于写测试用例
+    stick.utils = utils;
+
     module.exports = stick;
 });

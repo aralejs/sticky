@@ -3,17 +3,19 @@ define(function (require) {
     //mocha.setup({ignoreLeaks: true});
 
     var expect = require('expect');
-    var Sticky = require('sticky');
     var $ = require('$');
+    var sinon = require('sinon');
+
     var element = null;
     var setTop = 50;
     var elementTop;
 
-    var utils = require("../src/utils");
+    var Sticky = require('sticky'),
+        utils = require("../src/utils");
+
 
     var isPositionStickySupported = utils.checkPositionStickySupported(),
         isPositionFixedSupported = utils.checkPositionFixedSupported();
-
 
     describe('Sticky.fix', function () {
         beforeEach(function () {
@@ -235,6 +237,34 @@ define(function (require) {
 
                 obj1.destory();
                 obj2.destory();
+            }, 120);
+        });
+
+        it("不支持 position: sticky 的情况", function(done) {
+            var fakeCheckPositionStickySupported = sinon.stub(Sticky.utils, "checkPositionStickySupported");
+            fakeCheckPositionStickySupported.returns(false);
+
+            var obj = Sticky.stick(element, setTop).render();
+            $(document).scrollTop(elementTop + 300);
+
+            setTimeout(function () {
+                expect(element.css('position')).to.be(isPositionFixedSupported ? 'fixed' : 'absolute');
+                done();
+                obj.destory();
+            }, 120);
+        });
+
+        it("不支持 position: sticky 且不支持 position: fixed 的情况", function(done) {
+            var fakeCheckPositionFixedSupported = sinon.stub(Sticky.utils, "checkPositionFixedSupported");
+            fakeCheckPositionFixedSupported.returns(false);
+
+            var obj = Sticky.stick(element, setTop).render();
+            $(document).scrollTop(elementTop + 300);
+
+            setTimeout(function () {
+                expect(element.css('position')).to.be('absolute');
+                done();
+                obj.destory();
             }, 120);
         });
     });
