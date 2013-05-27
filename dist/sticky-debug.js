@@ -1,5 +1,5 @@
-define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.1.0/events-debug", "./utils-debug" ], function(require, exports, module) {
-    var $ = require("$-debug"), Events = require("arale/events/1.1.0/events-debug"), utils = require("./utils-debug");
+define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.0.0/events-debug", "./utils-debug" ], function(require, exports, module) {
+    var $ = require("$-debug"), Events = require("arale/events/1.0.0/events-debug"), utils = require("./utils-debug");
     var doc = $(document);
     /**
      * Fixed

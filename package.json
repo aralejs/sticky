@@ -16,7 +16,7 @@
     "spm": {
         "alias": {
             "$": "$",
-            "events": "arale/events/1.1.0/events"
+            "events": "arale/events/1.0.0/events"
         },
         "output": ["sticky.js"]
     },
