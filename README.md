@@ -27,14 +27,19 @@ seajs.use(["$", "sticky"], function($, sticky) {
         seajs.log("restored");
     }).render();
 });
-````
+```
 
 `element` 是指需要跟随滚动的目标元素，接受 jQuery selector 对象。
 
 `marginTop` 指当元素距离当前可视窗口顶部的距离等于这个值时，开始触发跟随状态。
 
-> 注意: 当 `marginTop` 设置的值超过元素本身在文档中的高度时, 就变为全局 fixed 效果。
-
+> 有几下三点注意:
+>
+>  1) 当 `marginTop` 设置的值超过元素本身在文档中的高度时, 就变为全局 fixed 效果
+>
+>  2) Sticky 对某些情况下的元素会向 DOM 中插入占位元素, 所以务必在 DOM ready 之后初始化该组件
+>
+>  3) 对于 ``position: static or relative`` 且 ``display`` 不为 ``none`` 的情况下, 会在当前元素后面插入宽高与元素相同的占位符.
 
 ### Sticky.fixed(element)
 
@@ -53,29 +58,7 @@ seajs.use(["$", "sticky"], function($, sticky) {
 
 `element` 是指需要 fixed 的目标元素，接受 jQuery selector 对象。
 
-> 注意: 1) 请自行设置元素的 `left, top` 等 CSS 属性。
->      2) **Sticky 对某些情况下的元素会向 DOM 中插入占位元素, 所以务必在 DOM ready 之后初始化该组件**
+> 注意: 请自行设置元素的 `left, top` 等 CSS 属性。
 
-## 使用说明 `1.0.1`
 
-这是一个工具模块，只提供一个接收两个参数的方法`Fixed`。
 
-### Fixed(element, marginTop)
-
-```js
-seajs.use('fixed', function(fixed){
-    Fixed('#test', 30);
-});
-```
-
-`element` 是指需要跟随滚动的目标元素，接受 jQuery selector 对象。
-
-`marginTop` 指当元素距离当前可视窗口顶部的距离等于这个值时，开始触发跟随 fixed 状态。
-
-当把第二个参数设置的特别大时，这基本上就是一个 js 的全局 Fixed 解决方案。
-
-```js
-seajs.use('fixed', function(fixed){
-    Fixed('#test', 20000);
-});
-```
