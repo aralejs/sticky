@@ -17,6 +17,8 @@ define(function (require) {
     var isPositionStickySupported = utils.checkPositionStickySupported(),
         isPositionFixedSupported = utils.checkPositionFixedSupported();
 
+    var fakeCheckPositionStickySupported, fakeCheckPositionFixedSupported;
+
     describe('Sticky.fix', function () {
         beforeEach(function () {
             $('body').css('height', '2000px');
@@ -241,7 +243,7 @@ define(function (require) {
         });
 
         it("不支持 position: sticky 的情况", function(done) {
-            var fakeCheckPositionStickySupported = sinon.stub(Sticky.utils, "checkPositionStickySupported");
+            fakeCheckPositionStickySupported = sinon.stub(Sticky.utils, "checkPositionStickySupported");
             fakeCheckPositionStickySupported.returns(false);
 
             var obj = Sticky.stick(element, setTop).render();
@@ -254,8 +256,29 @@ define(function (require) {
             }, 120);
         });
 
+        it("强制支持 position: sticky 的情况", function(done) {
+            fakeCheckPositionStickySupported.returns(true);
+
+            var obj = Sticky.stick(element, setTop).render();
+            $(document).scrollTop(elementTop + 300);
+
+            setTimeout(function () {
+                expect(element.css('position').indexOf("sticky") !== -1 || element.css('position') === "static").to.be(true);
+
+                $(document).scrollTop(0);
+
+                setTimeout(function() {
+                    expect(element.css('position') === "static").to.be(true);
+                    done();
+                    obj.destory();
+                }, 120);
+            }, 120);
+        });
+
         it("不支持 position: sticky 且不支持 position: fixed 的情况", function(done) {
-            var fakeCheckPositionFixedSupported = sinon.stub(Sticky.utils, "checkPositionFixedSupported");
+            fakeCheckPositionStickySupported.returns(false);
+
+            fakeCheckPositionFixedSupported = sinon.stub(Sticky.utils, "checkPositionFixedSupported");
             fakeCheckPositionFixedSupported.returns(false);
 
             var obj = Sticky.stick(element, setTop).render();
@@ -263,8 +286,15 @@ define(function (require) {
 
             setTimeout(function () {
                 expect(element.css('position')).to.be('absolute');
-                done();
-                obj.destory();
+                $(document).scrollTop(0);
+
+                setTimeout(function () {
+                    expect(element.css('position') === "static").to.be(true);
+
+                    done();
+                    obj.destory();
+
+                }, 120);
             }, 120);
         });
     });
