@@ -15,23 +15,28 @@
 
 ---
 
-## 使用说明 `1.1.1`
 
-### Sticky.stick(element, marginTop)
+## 使用说明 `1.2.0`
+
+### Sticky.stick(element, marginTop, callback)
 
 ```javascript
 seajs.use(["$", "sticky"], function($, sticky) {
     sticky.stick("#stick", 30, function(status) {
-        seajs.log("stick");
-    }).on("restored", function(e) {
-        seajs.log("restored");
-    }).render();
+        if (status) {
+            seajs.log("stick");
+        } else {
+            seajs.log("unstick");
+        }
+    });
 });
 ```
 
 `element` 是指需要跟随滚动的目标元素，接受 jQuery selector 对象。
 
 `marginTop` 指当元素距离当前可视窗口顶部的距离等于这个值时，开始触发跟随状态。
+
+`callback` 当元素更改状态之后的回调函数, 具有一个参数 status, 为 true 表示是 stick 状态, 为 false 为 unstick 状态.
 
 > 有几下三点注意:
 >
