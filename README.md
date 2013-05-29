@@ -11,7 +11,7 @@
 
 实现原理是支持 `position: sticky` 的直接使用 CSS 实现, 不支持的浏览器(除 IE6 外)使用 `position: fixed`，对 IE6 进行 js 模拟。
 
-> 原 `arale/fixed` 改名为 `arale/sticky`，原有的调用方式见下文。
+> 原 `arale/fixed` 改名为 `arale/sticky`。
 
 ---
 
