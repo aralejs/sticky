@@ -1,4 +1,4 @@
-define("arale/sticky/1.1.2/sticky-debug", [ "$-debug" ], function(require, exports, module) {
+define("arale/sticky/1.2.0/sticky-debug", [ "$-debug" ], function(require, exports, module) {
     var $ = require("$-debug"), doc = $(document), stickyPrefix = [ "-webkit-", "-ms-", "-o-", "-moz-", "" ], // 只需判断是否是 IE 和 IE6
     ua = (window.navigator.userAgent || "").toLowerCase(), isIE = ua.indexOf("msie") !== -1, isIE6 = ua.indexOf("msie 6") !== -1, guid = 0;
     var _isPositionStickySupported = checkPositionStickySupported(), _isPositionFixedSupported = checkPositionFixedSupported();
