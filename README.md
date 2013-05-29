@@ -15,13 +15,13 @@
 
 ---
 
-## 使用说明 `1.1.0`
+## 使用说明 `1.1.1`
 
 ### Sticky.stick(element, marginTop)
 
 ```javascript
 seajs.use(["$", "sticky"], function($, sticky) {
-    sticky.stick("#stick", 30).on("stick", function(e) {
+    sticky.stick("#stick", 30, function(status) {
         seajs.log("stick");
     }).on("restored", function(e) {
         seajs.log("restored");

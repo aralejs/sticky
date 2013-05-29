@@ -10,12 +10,11 @@ define(function (require) {
     var setTop = 50;
     var elementTop;
 
-    var Sticky = require('sticky'),
-        utils = require("../src/utils");
+    var Sticky = require('sticky');
 
 
-    var isPositionStickySupported = utils.checkPositionStickySupported(),
-        isPositionFixedSupported = utils.checkPositionFixedSupported();
+    var isPositionStickySupported = Sticky.isPositionStickySupported,
+        isPositionFixedSupported = Sticky.isPositionFixedSupported;
 
     var fakeCheckPositionStickySupported, fakeCheckPositionFixedSupported;
 
@@ -113,7 +112,7 @@ define(function (require) {
 
         it('滚动了一像素', function (done) {
             var originPosition = element.css('position');
-            var obj = Sticky.stick(element, setTop).render();
+            var obj = Sticky.stick(element, setTop);
             $(document).scrollTop(1);
 
             setTimeout(function () {
@@ -129,7 +128,7 @@ define(function (require) {
 
         it('滚动到差一像素', function (done) {
             var originPosition = element.css('position');
-            var obj = Sticky.stick(element, setTop).render();
+            var obj = Sticky.stick(element, setTop);
             $(document).scrollTop(elementTop - 1);
 
             setTimeout(function () {
@@ -144,7 +143,7 @@ define(function (require) {
         });
 
         it('滚动到元素临界位置', function (done) {
-            var obj = Sticky.stick(element, setTop).render();
+            var obj = Sticky.stick(element, setTop);
             $(document).scrollTop(elementTop);
 
             setTimeout(function () {
@@ -161,7 +160,7 @@ define(function (require) {
         });
 
         it('滚动到元素临界位置多一像素', function (done) {
-            var obj = Sticky.stick(element, setTop).render();
+            var obj = Sticky.stick(element, setTop);
             $(document).scrollTop(elementTop + 1);
 
             setTimeout(function () {
@@ -179,7 +178,7 @@ define(function (require) {
         });
 
         it('滚动到元素临界位置多300像素', function (done) {
-            var obj = Sticky.stick(element, setTop).render();
+            var obj = Sticky.stick(element, setTop);
             $(document).scrollTop(elementTop + 300);
 
             setTimeout(function () {
@@ -195,14 +194,16 @@ define(function (require) {
             }, 120);
         });
 
-        it('stick/restored 事件触发', function (done) {
+        it('stick 回调', function (done) {
             var triggered = 0;
 
-            var obj = Sticky.stick(element, setTop).on("stick",function () {
+            var obj = Sticky.stick(element, setTop, function(status) {
+                if (status) {
                     triggered = 1;
-                }).on("restored",function () {
+                } else {
                     triggered = 2;
-                }).render();
+                }
+            });
 
             $(document).scrollTop(elementTop);
 
@@ -221,14 +222,20 @@ define(function (require) {
         it('重复绑定', function (done) {
             var triggered = 0;
 
-            var obj1 = Sticky.stick(element, setTop);
-            obj1.on("stick",function () {
+            var obj1 = Sticky.stick(element, setTop, function(status) {
+                if (status) {
                     triggered = 1;
-                }).render();
-            var obj2 = Sticky.stick(element, setTop);
-            obj2.on("stick",function () {
+                } else {
                     triggered = 2;
-                }).render();
+                }
+            });
+            var obj2 = Sticky.stick(element, setTop, function(status) {
+                if (status) {
+                    triggered = 3;
+                } else {
+                    triggered = 4;
+                }
+            });
 
             $(document).scrollTop(elementTop);
 
@@ -238,15 +245,13 @@ define(function (require) {
                 done();
 
                 obj1.destory();
-                obj2.destory();
             }, 120);
         });
 
         it("不支持 position: sticky 的情况", function(done) {
-            fakeCheckPositionStickySupported = sinon.stub(Sticky.utils, "checkPositionStickySupported");
-            fakeCheckPositionStickySupported.returns(false);
+            Sticky.isPositionStickySupported = false;
 
-            var obj = Sticky.stick(element, setTop).render();
+            var obj = Sticky.stick(element, setTop);
             $(document).scrollTop(elementTop + 300);
 
             setTimeout(function () {
@@ -257,9 +262,9 @@ define(function (require) {
         });
 
         it("强制支持 position: sticky 的情况", function(done) {
-            fakeCheckPositionStickySupported.returns(true);
+            Sticky.isPositionStickySupported = true;
 
-            var obj = Sticky.stick(element, setTop).render();
+            var obj = Sticky.stick(element, setTop);
             $(document).scrollTop(elementTop + 300);
 
             setTimeout(function () {
@@ -276,12 +281,11 @@ define(function (require) {
         });
 
         it("不支持 position: sticky 且不支持 position: fixed 的情况", function(done) {
-            fakeCheckPositionStickySupported.returns(false);
+            Sticky.isPositionStickySupported = false;
 
-            fakeCheckPositionFixedSupported = sinon.stub(Sticky.utils, "checkPositionFixedSupported");
-            fakeCheckPositionFixedSupported.returns(false);
+            Sticky.isPositionFixedSupported = false;
 
-            var obj = Sticky.stick(element, setTop).render();
+            var obj = Sticky.stick(element, setTop);
             $(document).scrollTop(elementTop + 300);
 
             setTimeout(function () {

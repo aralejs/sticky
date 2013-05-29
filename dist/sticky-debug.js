@@ -1,30 +1,23 @@
-define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.0.0/events-debug", "./utils-debug" ], function(require, exports, module) {
-    var $ = require("$-debug"), Events = require("arale/events/1.0.0/events-debug"), utils = require("./utils-debug");
-    var doc = $(document);
-    /**
-     * Fixed
-     * @param options
-     * @constructor
-     *      options.element: Selector
-     */
+define("arale/sticky/1.1.2/sticky-debug", [ "$-debug" ], function(require, exports, module) {
+    var $ = require("$-debug"), doc = $(document), stickyPrefix = [ "-webkit-", "-ms-", "-o-", "-moz-", "" ], // 只需判断是否是 IE 和 IE6
+    ua = (window.navigator.userAgent || "").toLowerCase(), isIE = ua.indexOf("msie") !== -1, isIE6 = ua.indexOf("msie 6") !== -1, guid = 0;
+    var _isPositionStickySupported = checkPositionStickySupported(), _isPositionFixedSupported = checkPositionFixedSupported();
     function Fixed(options) {
-        var self = this;
-        /*if (!(self instanceof Fixed)) {
-            return new Fixed(options);
-        }*/
-        self.options = options;
+        this.options = options;
+        this._stickyId = guid++;
     }
-    Events.mixTo(Fixed);
     Fixed.prototype.render = function() {
         var self = this, elem = self.elem = $(self.options.element);
         // 一个元素只允许绑定一次
         if (!elem.length || elem.data("bind-fixed")) return;
         // 记录元素原来的位置
         self._originTop = elem.offset().top;
+        self._originLeft = elem.offset().left;
         self.marginTop = $.isNumeric(self.options.marginTop) ? Math.min(self.options.marginTop, self._originTop) : self._originTop;
         self._originStyles = {
             position: null,
-            top: null
+            top: null,
+            left: null
         };
         // 保存原有的样式
         for (var style in self._originStyles) {
@@ -32,27 +25,15 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.0.0/event
                 self._originStyles[style] = elem.css(style);
             }
         }
-        var isPositionFixedSupported = utils.checkPositionFixedSupported(), scrollFn = isPositionFixedSupported ? $.proxy(self._supportFixed, self) : $.proxy(self._supportAbsolute, self);
+        var scrollFn = stick.isPositionFixedSupported ? $.proxy(self._supportFixed, self) : $.proxy(self._supportAbsolute, self);
         // 先运行一次
         scrollFn();
         // 监听滚动事件
         // fixed 是本模块绑定的滚动事件的命名空间
-        if (isPositionFixedSupported) {
-            $(window).on("scroll", function() {
-                if (!elem.is(":visible")) return;
-                scrollFn();
-            });
-        } else {
-            var timer = null;
-            $(window).on("scroll", function() {
-                timer && clearTimeout(timer);
-                timer = setTimeout(function() {
-                    if (!elem.is(":visible")) return;
-                    scrollFn();
-                    timer = null;
-                }, 100);
-            });
-        }
+        $(window).on("scroll." + self._stickyId, function() {
+            if (!elem.is(":visible")) return;
+            scrollFn();
+        });
         elem.data("bind-fixed", true);
         return self;
     };
@@ -66,10 +47,11 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.0.0/event
             self._addPlaceholder();
             elem.css({
                 position: "fixed",
-                top: marginTop
+                top: marginTop,
+                left: self._originLeft
             });
             elem.data("_fixed", true);
-            self.trigger("stick", elem);
+            $.isFunction(self.options.callback) && self.options.callback.call(self, true);
         } else if (elem.data("_fixed") && distance > marginTop) {
             self._restore();
         }
@@ -87,25 +69,26 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.0.0/event
                 top: marginTop + doc.scrollTop()
             });
             elem.data("_fixed", true);
-            self.trigger("stick", elem);
+            $.isFunction(self.options.callback) && self.options.callback.call(self, true);
         } else if (elem.data("_fixed") && distance > marginTop) {
             self._restore();
         }
+        elem[0].className = elem[0].className;
     };
-    Fixed.prototype._restore = function() {
+    Fixed.prototype._restore = function(f) {
         var self = this, elem = self.elem;
         self._removePlaceholder();
         // 恢复原有的样式
         elem.css(self._originStyles);
         elem.data("_fixed", false);
-        self.trigger("restored", elem);
+        !f && $.isFunction(self.options.callback) && self.options.callback.call(self, false);
     };
     // 需要占位符的情况有: 1) position: static or relative; 但除了:
     // 1) !display: block;
     Fixed.prototype._addPlaceholder = function() {
         var self = this, elem = self.elem;
         var need = false, flt = elem.css("float"), position = elem.css("position"), display = elem.css("display");
-        if (utils.indexOf([ "static", "relative" ], position) !== -1) need = true;
+        if (indexOf([ "static", "relative" ], position) !== -1) need = true;
         if (display !== "block") need = false;
         if (need) {
             // 添加占位符
@@ -120,21 +103,14 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.0.0/event
     };
     Fixed.prototype.destory = function() {
         var self = this;
-        self.off();
-        self._removePlaceholder();
+        self._restore(1);
+        self.elem.data("bind-fixed", false);
+        $(window).off("scroll." + self._stickyId);
     };
-    /**
-     * Sticky
-     * @param options
-     * @constructor
-     *      options.element: Selector
-     *      options.marginTop: Number
-     */
     function Sticky(options) {
-        var self = this;
-        self.options = options;
+        this.options = options;
+        this._stickyId = guid++;
     }
-    Events.mixTo(Sticky);
     Sticky.prototype.render = function() {
         var self = this, elem = self.elem = $(self.options.element), tmp = "";
         // 一个元素只允许绑定一次
@@ -142,13 +118,22 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.0.0/event
         // 记录元素原来的位置
         self._originTop = elem.offset().top;
         self.marginTop = $.isNumeric(self.options.marginTop) ? Math.min(self.options.marginTop, self._originTop) : self._originTop;
-        for (var i = 0; i < utils.stickyPrefix.length; i++) {
-            tmp += "position:" + utils.stickyPrefix[i] + "sticky;";
+        self._originStyles = {
+            position: null,
+            top: null
+        };
+        // 保存原有的样式
+        for (var style in self._originStyles) {
+            if (self._originStyles.hasOwnProperty(style)) {
+                self._originStyles[style] = elem.css(style);
+            }
+        }
+        for (var i = 0; i < stickyPrefix.length; i++) {
+            tmp += "position:" + stickyPrefix[i] + "sticky;";
         }
         elem[0].style.cssText += tmp + "top: " + self.marginTop + "px;";
-        // 和 fixed 一致, 滚动时两个触发事件, 如果不需要事件的话, 下面的代码都可以删掉...
         self._supportSticky();
-        $(window).on("scroll", function() {
+        $(window).on("scroll." + self._stickyId, function() {
             if (!elem.is(":visible")) return;
             self._supportSticky();
         });
@@ -161,21 +146,31 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.0.0/event
         if (!elem.data("_fixed") && distance <= marginTop) {
             elem.data("_fixed", true);
             // 支持 position: sticky 的是不需要占位符的
-            self.trigger("stick", elem);
+            $.isFunction(self.options.callback) && self.options.callback.call(self, true);
         } else if (elem.data("_fixed") && distance > marginTop) {
-            elem.data("_fixed", false);
-            self.trigger("restored", elem);
+            self._restore();
         }
     };
-    Sticky.prototype.destory = function() {
-        this.off();
+    Sticky.prototype._restore = function(f) {
+        var self = this, elem = self.elem;
+        // 恢复原有的样式
+        elem.css(self._originStyles);
+        elem.data("_fixed", false);
+        !f && $.isFunction(self.options.callback) && self.options.callback.call(self, false);
     };
-    function stick(elem, marginTop) {
-        var actual = utils.checkPositionStickySupported() ? Sticky : Fixed;
+    Sticky.prototype.destory = function() {
+        var self = this;
+        self._restore(1);
+        self.elem.data("bind-fixed", false);
+        $(window).off("scroll." + self._stickyId);
+    };
+    function stick(elem, marginTop, callback) {
+        var actual = stick.isPositionStickySupported ? Sticky : Fixed;
         return new actual({
             element: elem,
-            marginTop: marginTop
-        });
+            marginTop: marginTop,
+            callback: callback
+        }).render();
     }
     stick.stick = stick;
     stick.fix = function(elem) {
@@ -183,59 +178,39 @@ define("arale/sticky/1.1.0/sticky-debug", [ "$-debug", "arale/events/1.0.0/event
             element: elem
         }).render();
     };
-    // 便于写测试用例
-    stick.utils = utils;
-    module.exports = stick;
-});
-
-define("arale/sticky/1.1.0/utils-debug", [ "$-debug" ], function(require, exports, module) {
-    var $ = require("$-debug"), doc = document, stickyPrefix = [ "-webkit-", "-ms-", "-o-", "-moz-", "" ], // 只需判断是否是 IE 和 IE6
-    ua = (window.navigator.userAgent || "").toLowerCase(), isIE = ua.indexOf("msie") !== -1, isIE6 = ua.indexOf("msie 6") !== -1;
-    return {
-        // https://github.com/RubyLouvre/detectPositionFixed/blob/master/index.js
-        checkPositionFixedSupported: function() {
-            if (isIE6) return false;
-            var positionfixed;
-            var test = document.createElement("div"), control = test.cloneNode(false), root = document.body;
-            var oldCssText = root.style.cssText;
-            root.style.cssText = "padding:0;margin:0";
-            test.style.cssText = "position:fixed;top:42px";
-            root.appendChild(test);
-            root.appendChild(control);
-            positionfixed = test.offsetTop !== control.offsetTop;
-            test.parentNode.removeChild(test);
-            control.parentNode.removeChild(control);
-            root.style.cssText = oldCssText;
-            return positionfixed;
-        },
-        checkPositionStickySupported: function() {
-            if (isIE) return false;
-            var container = doc.body;
-            if (doc.createElement && container && container.appendChild && container.removeChild) {
-                var isSupported, el = doc.createElement("div"), getStyle = function(st) {
-                    if (window.getComputedStyle) {
-                        return window.getComputedStyle(el).getPropertyValue(st);
-                    } else {
-                        return el.currentStyle.getAttribute(st);
-                    }
-                };
-                container.appendChild(el);
-                for (var i = 0; i < stickyPrefix.length; i++) {
-                    el.style.cssText = "position:" + stickyPrefix[i] + "sticky;visibility:hidden;";
-                    if (isSupported = getStyle("position").indexOf("sticky") !== -1) break;
+    function checkPositionFixedSupported() {
+        return !isIE6;
+    }
+    function checkPositionStickySupported() {
+        if (isIE) return false;
+        var container = doc[0].body;
+        if (doc[0].createElement && container && container.appendChild && container.removeChild) {
+            var isSupported, el = doc[0].createElement("div"), getStyle = function(st) {
+                if (window.getComputedStyle) {
+                    return window.getComputedStyle(el).getPropertyValue(st);
+                } else {
+                    return el.currentStyle.getAttribute(st);
                 }
-                el.parentNode.removeChild(el);
-                return isSupported;
+            };
+            container.appendChild(el);
+            for (var i = 0; i < stickyPrefix.length; i++) {
+                el.style.cssText = "position:" + stickyPrefix[i] + "sticky;visibility:hidden;";
+                if (isSupported = getStyle("position").indexOf("sticky") !== -1) break;
             }
-            return false;
-        },
-        indexOf: function(array, item) {
-            if (array == null) return -1;
-            var nativeIndexOf = Array.prototype.indexOf;
-            if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
-            for (var i = 0; i < array.length; i++) if (array[i] === item) return i;
-            return -1;
-        },
-        stickyPrefix: stickyPrefix
-    };
+            el.parentNode.removeChild(el);
+            return isSupported;
+        }
+        return false;
+    }
+    function indexOf(array, item) {
+        if (array == null) return -1;
+        var nativeIndexOf = Array.prototype.indexOf;
+        if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
+        for (var i = 0; i < array.length; i++) if (array[i] === item) return i;
+        return -1;
+    }
+    // 便于写测试用例
+    stick.isPositionFixedSupported = _isPositionFixedSupported;
+    stick.isPositionStickySupported = _isPositionStickySupported;
+    module.exports = stick;
 });

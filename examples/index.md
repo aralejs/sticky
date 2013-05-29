@@ -56,11 +56,13 @@
 ````javascript
 seajs.use(["$", "sticky"], function($, sticky) {
     // sticky
-    sticky.stick("#stick", 30).on("stick", function(e) {
-        seajs.log("stick");
-    }).on("restored", function(e) {
-        seajs.log("restored");
-    }).render();
+    sticky.stick("#stick", 30, function(status) {
+        if (status) {
+            seajs.log("stick");
+        } else {
+            seajs.log("unstick");
+        }
+    });
 
     // fixed
     $('<div id="gotop">回到顶部</div>').appendTo("body");

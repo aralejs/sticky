@@ -2,6 +2,11 @@
 
 ---
 
+## 1.1.1
+
+`tag:improved` 优化接口, 去除 event 依赖, 增加 callback 参数. 简化两个 position 判断.
+
+
 ## 1.1.0
 
 `tag:changed` 组件由 `arale/fixed` 改名为 `arale/sticky`。
