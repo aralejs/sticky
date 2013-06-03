@@ -4,7 +4,7 @@
 
 ## 1.2.0
 
-`tag:improved` 优化接口, 去除 event 依赖, 增加 callback 参数. 简化两个 position 判断.
+`tag:improved` 优化接口, 去除 event 依赖, 增加 callback 参数. 简化两个 position 判断.  [#11](https://github.com/aralejs/sticky/issues/11)
 
 
 ## 1.1.0
