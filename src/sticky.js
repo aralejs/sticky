@@ -48,6 +48,11 @@ define(function (require, exports, module) {
 
         var scrollFn = stick.isPositionFixedSupported ? $.proxy(self._supportFixed, self) : $.proxy(self._supportAbsolute, self);
 
+        if (!stick.isPositionFixedSupported) {
+            // avoid floatImage Shake for IE6
+            // see: https://github.com/lifesinger/lifesinger.github.com/blob/master/lab/2009/ie6_fixed_position_v4.html
+            $("<style type='text/css'> * html { background:url(null) no-repeat fixed; } </style>").appendTo("head");
+        }
         // 先运行一次
         scrollFn();
 
@@ -113,8 +118,6 @@ define(function (require, exports, module) {
         } else if (elem.data('_fixed') && distance > marginTop) {
             self._restore();
         }
-
-        elem[0].className = elem[0].className;
     };
     Fixed.prototype._restore = function (f) {
         var self = this,
