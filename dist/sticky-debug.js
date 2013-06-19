@@ -1,4 +1,4 @@
-define("arale/sticky/1.2.0/sticky-debug", [ "$-debug" ], function(require, exports, module) {
+define("arale/sticky/1.2.1/sticky-debug", [ "$-debug" ], function(require, exports, module) {
     var $ = require("$-debug"), doc = $(document), stickyPrefix = [ "-webkit-", "-ms-", "-o-", "-moz-", "" ], // 只需判断是否是 IE 和 IE6
     ua = (window.navigator.userAgent || "").toLowerCase(), isIE = ua.indexOf("msie") !== -1, isIE6 = ua.indexOf("msie 6") !== -1, guid = 0;
     var _isPositionStickySupported = checkPositionStickySupported(), _isPositionFixedSupported = checkPositionFixedSupported();
@@ -12,7 +12,6 @@ define("arale/sticky/1.2.0/sticky-debug", [ "$-debug" ], function(require, expor
         if (!elem.length || elem.data("bind-fixed")) return;
         // 记录元素原来的位置
         self._originTop = elem.offset().top;
-        self._originLeft = elem.offset().left;
         self.marginTop = $.isNumeric(self.options.marginTop) ? Math.min(self.options.marginTop, self._originTop) : self._originTop;
         self._originStyles = {
             position: null,
@@ -49,11 +48,12 @@ define("arale/sticky/1.2.0/sticky-debug", [ "$-debug" ], function(require, expor
         // 当距离小于等于预设的值时
         // 将元素设为 fix 状态
         if (!elem.data("_fixed") && distance <= marginTop) {
+            var offsetLeft = elem.offset().left;
             self._addPlaceholder();
             elem.css({
                 position: "fixed",
                 top: marginTop,
-                left: self._originLeft
+                left: offsetLeft
             });
             elem.data("_fixed", true);
             $.isFunction(self.options.callback) && self.options.callback.call(self, true);
@@ -116,7 +116,7 @@ define("arale/sticky/1.2.0/sticky-debug", [ "$-debug" ], function(require, expor
         this._stickyId = guid++;
     }
     Sticky.prototype.render = function() {
-        var self = this, elem = self.elem = $(self.options.element), tmp = "";
+        var self = this, elem = self.elem = $(self.options.element);
         // 一个元素只允许绑定一次
         if (!elem.length || elem.data("bind-fixed")) return;
         // 记录元素原来的位置
@@ -132,10 +132,6 @@ define("arale/sticky/1.2.0/sticky-debug", [ "$-debug" ], function(require, expor
                 self._originStyles[style] = elem.css(style);
             }
         }
-        for (var i = 0; i < stickyPrefix.length; i++) {
-            tmp += "position:" + stickyPrefix[i] + "sticky;";
-        }
-        elem[0].style.cssText += tmp + "top: " + self.marginTop + "px;";
         self._supportSticky();
         $(window).on("scroll." + self._stickyId, function() {
             if (!elem.is(":visible")) return;
@@ -145,9 +141,13 @@ define("arale/sticky/1.2.0/sticky-debug", [ "$-debug" ], function(require, expor
         return self;
     };
     Sticky.prototype._supportSticky = function() {
-        var self = this, elem = self.elem, originTop = self._originTop, marginTop = self.marginTop;
+        var self = this, elem = self.elem, originTop = self._originTop, marginTop = self.marginTop, tmp = "";
         var distance = originTop - doc.scrollTop();
         if (!elem.data("_fixed") && distance <= marginTop) {
+            for (var i = 0; i < stickyPrefix.length; i++) {
+                tmp += "position:" + stickyPrefix[i] + "sticky;";
+            }
+            elem[0].style.cssText += tmp + "top: " + self.marginTop + "px;";
             elem.data("_fixed", true);
             // 支持 position: sticky 的是不需要占位符的
             $.isFunction(self.options.callback) && self.options.callback.call(self, true);
@@ -172,7 +172,7 @@ define("arale/sticky/1.2.0/sticky-debug", [ "$-debug" ], function(require, expor
         var actual = stick.isPositionStickySupported ? Sticky : Fixed;
         return new actual({
             element: elem,
-            marginTop: marginTop,
+            marginTop: marginTop || 0,
             callback: callback
         }).render();
     }

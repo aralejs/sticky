@@ -30,7 +30,6 @@ define(function (require, exports, module) {
 
         // 记录元素原来的位置
         self._originTop = elem.offset().top;
-        self._originLeft = elem.offset().left;
         self.marginTop = $.isNumeric(self.options.marginTop) ? Math.min(self.options.marginTop, self._originTop) : self._originTop;
 
 
@@ -79,12 +78,14 @@ define(function (require, exports, module) {
         // 当距离小于等于预设的值时
         // 将元素设为 fix 状态
         if (!elem.data('_fixed') && distance <= marginTop) {
+            var offsetLeft = elem.offset().left;
+
             self._addPlaceholder();
 
             elem.css({
                 position: 'fixed',
                 top: marginTop,
-                left: self._originLeft
+                left: offsetLeft
             });
 
             elem.data('_fixed', true);
@@ -107,7 +108,6 @@ define(function (require, exports, module) {
         // 将元素设为 fix 状态
         if (distance <= marginTop) {
             self._addPlaceholder();
-
             elem.css({
                 position: 'absolute',
                 top: marginTop + doc.scrollTop()
@@ -177,8 +177,7 @@ define(function (require, exports, module) {
 
     Sticky.prototype.render = function () {
         var self = this,
-            elem = self.elem = $(self.options.element),
-            tmp = "";
+            elem = self.elem = $(self.options.element);
 
         // 一个元素只允许绑定一次
         if (!elem.length || elem.data('bind-fixed')) return;
@@ -199,12 +198,6 @@ define(function (require, exports, module) {
             }
         }
 
-        for (var i = 0; i < stickyPrefix.length; i++) {
-            tmp += "position:" + stickyPrefix[i] + "sticky;";
-        }
-
-        elem[0].style.cssText += tmp + "top: " + self.marginTop + "px;";
-
         self._supportSticky();
 
         $(window).on('scroll.'+self._stickyId, function () {
@@ -220,11 +213,18 @@ define(function (require, exports, module) {
         var self = this,
             elem = self.elem,
             originTop = self._originTop,
-            marginTop = self.marginTop;
+            marginTop = self.marginTop,
+            tmp = "";
 
         var distance = originTop - doc.scrollTop();
 
         if (!elem.data('_fixed') && distance <= marginTop) {
+            for (var i = 0; i < stickyPrefix.length; i++) {
+                tmp += "position:" + stickyPrefix[i] + "sticky;";
+            }
+
+            elem[0].style.cssText += tmp + "top: " + self.marginTop + "px;";
+
             elem.data('_fixed', true);
             // 支持 position: sticky 的是不需要占位符的
             $.isFunction(self.options.callback) && self.options.callback.call(self, true);
@@ -258,7 +258,7 @@ define(function (require, exports, module) {
 
         return (new actual({
             element: elem,
-            marginTop: marginTop,
+            marginTop: marginTop || 0,
             callback: callback
         })).render();
     }

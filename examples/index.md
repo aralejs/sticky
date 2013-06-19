@@ -56,7 +56,7 @@
 ````javascript
 seajs.use(["$", "sticky"], function($, sticky) {
     // sticky
-    sticky.stick("#stick", 30, function(status) {
+    sticky.stick("#stick", 0, function(status) {
         if (status) {
             seajs.log("stick");
         } else {
@@ -65,14 +65,14 @@ seajs.use(["$", "sticky"], function($, sticky) {
     });
 
     // fixed
-    $('<div id="gotop">回到顶部</div>').appendTo("body");
-    sticky.fix("#gotop");
+    //$('<div id="gotop">回到顶部</div>').appendTo("body");
+    //sticky.fix("#gotop");
 
-    $('<div id="nav">顶层fixed导航</div>').appendTo("body");
-    sticky.fix("#nav");
+    //$('<div id="nav">顶层fixed导航</div>').appendTo("body");
+    //sticky.fix("#nav");
 
-    $('<div id="bottom">footer fixed</div>').appendTo("body");
-    sticky.fix("#bottom");
+    //$('<div id="bottom">footer fixed</div>').appendTo("body");
+    //sticky.fix("#bottom");
 });
 ````
     
