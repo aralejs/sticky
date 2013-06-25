@@ -163,11 +163,12 @@ define(function (require, exports, module) {
         this.callback.call(this, false);
     };
 
-    // 需要占位符的情况有: 1) position: static or relative; 但除了 display 不是 block
+    // 需要占位符的情况有: 1) position: static or relative，除了 display 不是 block 的情况
     Sticky.prototype._addPlaceholder = function() {
         var need = false;
+        var position = this.elem.css("position");
 
-        if (indexOf(["static", "relative"], this.elem.css("position")) !== -1) {
+        if (position === 'static' || position === 'relative') {
             need = true;
         }
         if (this.elem.css("display") !== "block") {
@@ -254,15 +255,6 @@ define(function (require, exports, module) {
             el.parentNode.removeChild(el);
             return isSupported;
         }
-    }
-
-    function indexOf(array, item) {
-        if (array == null) return -1;
-        var nativeIndexOf = Array.prototype.indexOf;
-
-        if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
-        for (var i = 0; i < array.length; i++) if (array[i] === item) return i;
-        return -1;
     }
 
 });
