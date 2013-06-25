@@ -254,8 +254,6 @@ define(function (require, exports, module) {
             el.parentNode.removeChild(el);
             return isSupported;
         }
-
-        return false;
     }
 
     function indexOf(array, item) {

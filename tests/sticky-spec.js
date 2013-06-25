@@ -195,6 +195,31 @@ define(function (require) {
             }, timeout);
         });
 
+        it('不可见元素', function (done) {
+            var obj = Sticky.stick(element, setTop);
+            element.hide();            
+            $(document).scrollTop(elementTop + 300);
+
+            setTimeout(function () {
+                expect(element.css('position')).to.be("static");
+                done();
+                element.show();
+                obj.destory();
+            }, timeout);
+        });
+
+        it('非块级元素，不加占位元素，以减少复杂性', function (done) {
+            element.css('display', 'inline')
+            var obj = Sticky.stick(element, setTop);
+            $(document).scrollTop(elementTop + 300);
+
+            setTimeout(function () {
+                expect(obj._placeholder).to.be(undefined);
+                done();
+                obj.destory();
+            }, timeout);
+        });
+
         it('stick 回调', function (done) {
             var triggered = 0;
 
