@@ -9,6 +9,7 @@ define(function (require) {
     var element = null;
     var setTop = 50;
     var elementTop;
+    var timeout = 0;
 
     var Sticky = require('sticky');
 
@@ -41,14 +42,17 @@ define(function (require) {
             $(document).scrollTop(500);
 
             setTimeout(function () {
-
-                expect(element.css('position')).to.be(isPositionFixedSupported ? 'fixed' : 'absolute');
+                if (isPositionStickySupported) {
+                    expect(element.css('position').indexOf('sticky') !== -1).to.be(true);
+                } else {
+                    expect(element.css('position')).to.be(isPositionFixedSupported ? 'fixed' : 'absolute');
+                    expect(obj._placeholder.length).to.be(1);                
+                }
                 expect(element.offset().top).to.be(oldTop + 500);
-                expect(obj._placeholder.length).to.be(1);
                 done();
 
                 obj.destory();
-            }, 120);
+            }, timeout);
         });
         it('不需要占位符的 fixed 元素', function (done) {
             element.css("position", "absolute");
@@ -60,7 +64,7 @@ define(function (require) {
                 expect(obj._placeholder).to.be(undefined);
                 done();
                 obj.destory();
-            }, 120);
+            }, timeout);
 
         });
         it('float: left 时', function (done) {
@@ -73,7 +77,7 @@ define(function (require) {
                 expect(obj._placeholder.length).to.be(1);
                 done();
                 obj.destory();
-            }, 120);
+            }, timeout);
 
         });
 
@@ -85,12 +89,12 @@ define(function (require) {
             $(document).scrollTop(500);
 
             setTimeout(function () {
-                expect(element.data("bind-fixed")).to.be(true);
+                expect(element.data("bind-sticked")).to.be(true);
                 expect(obj2).to.be(undefined);
                 done();
 
                 obj1.destory();
-            }, 120);
+            }, timeout);
         });
     });
 
@@ -123,7 +127,7 @@ define(function (require) {
                 }
                 done();
                 obj.destory();
-            }, 120);
+            }, timeout);
         });
 
         it('滚动到差一像素', function (done) {
@@ -139,7 +143,7 @@ define(function (require) {
                 }
                 done();
                 obj.destory();
-            }, 120);
+            }, timeout);
         });
 
         it('滚动到元素临界位置', function (done) {
@@ -156,7 +160,7 @@ define(function (require) {
                 }
                 done();
                 obj.destory();
-            }, 120);
+            }, timeout);
         });
 
         it('滚动到元素临界位置多一像素', function (done) {
@@ -173,7 +177,7 @@ define(function (require) {
                 }
                 done();
                 obj.destory();
-            }, 120);
+            }, timeout);
 
         });
 
@@ -191,7 +195,7 @@ define(function (require) {
                 }
                 done();
                 obj.destory();
-            }, 120);
+            }, timeout);
         });
 
         it('stick 回调', function (done) {
@@ -215,8 +219,8 @@ define(function (require) {
                     expect(triggered).to.be(2);
                     done();
                     obj.destory();
-                }, 120);
-            }, 120);
+                }, timeout);
+            }, timeout);
         });
 
         it('重复绑定', function (done) {
@@ -245,7 +249,7 @@ define(function (require) {
                 done();
 
                 obj1.destory();
-            }, 120);
+            }, timeout);
         });
 
         it("不支持 position: sticky 的情况", function(done) {
@@ -258,7 +262,7 @@ define(function (require) {
                 expect(element.css('position')).to.be(isPositionFixedSupported ? 'fixed' : 'absolute');
                 done();
                 obj.destory();
-            }, 120);
+            }, timeout);
         });
 
         it("强制支持 position: sticky 的情况", function(done) {
@@ -268,16 +272,16 @@ define(function (require) {
             $(document).scrollTop(elementTop + 300);
 
             setTimeout(function () {
+                console.log(element.css('position'));
                 expect(element.css('position').indexOf("sticky") !== -1 || element.css('position') === "static").to.be(true);
-
                 $(document).scrollTop(0);
 
                 setTimeout(function() {
                     expect(element.css('position') === "static").to.be(true);
                     done();
                     obj.destory();
-                }, 120);
-            }, 120);
+                }, timeout);
+            }, timeout);
         });
 
         it("不支持 position: sticky 且不支持 position: fixed 的情况", function(done) {
@@ -298,8 +302,8 @@ define(function (require) {
                     done();
                     obj.destory();
 
-                }, 120);
-            }, 120);
+                }, timeout);
+            }, timeout);
         });
     });
 

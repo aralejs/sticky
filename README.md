@@ -16,13 +16,13 @@
 ---
 
 
-## 使用说明 `1.2.0`
+## 使用说明
 
-### Sticky.stick(element, marginTop, callback)
+### Sticky(element, marginTop, callback)
 
 ```javascript
 seajs.use(["$", "sticky"], function($, sticky) {
-    sticky.stick("#stick", 30, function(status) {
+    sticky("#stick", 30, function(status) {
         if (status) {
             seajs.log("stick");
         } else {
@@ -46,23 +46,17 @@ seajs.use(["$", "sticky"], function($, sticky) {
 >
 >  3) 对于 ``position: static or relative`` 且 ``display`` 不为 ``none`` 的情况下, 会在当前元素后面插入宽高与元素相同的占位符.
 
+
 ### Sticky.fixed(element)
 
 ```javascript
-seajs.use(["$", "sticky"], function($, sticky) {
-    $('<div id="gotop">回到顶部</div>').appendTo("body");
-    sticky.fix("#gotop");
+seajs.use(["sticky"], function(sticky) {
 
-    $('<div id="nav">顶层 fixed 导航</div>').appendTo("body");
-    sticky.fix("#nav");
+    sticky.fix("#element-need-to-fixed");
 
-    $('<div id="bottom">footer fixed</div>').appendTo("body");
-    sticky.fix("#bottom");
 });
 ```
 
 `element` 是指需要 fixed 的目标元素，接受 jQuery selector 对象。
 
 > 注意: 请自行设置元素的 `left, top` 等 CSS 属性。
-
-

@@ -39,7 +39,6 @@
     left: 0;
     top: 0;
     width: 100%;
-
 }
 #bottom {
     width: 100%;
@@ -56,7 +55,7 @@
 ````javascript
 seajs.use(["$", "sticky"], function($, sticky) {
     // sticky
-    sticky.stick("#stick", 0, function(status) {
+    sticky("#stick", 30, function(status) {
         if (status) {
             seajs.log("stick");
         } else {
