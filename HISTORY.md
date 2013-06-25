@@ -5,6 +5,7 @@
 ## 1.2.1
 
 `tag:improved` 修改 sticky.stick 的默认 marginTop 为 0, fix [#13](https://github.com/aralejs/sticky/issues/13)
+
 `tag:improved` 优化代码结构。
 
 ## 1.2.0
