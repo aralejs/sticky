@@ -69,8 +69,8 @@ define(function (require) {
                 done();
                 obj.destory();
             }, timeout);
-
         });
+        
         it('float: left 时', function (done) {
             element.css("float", "left");
 
@@ -118,19 +118,26 @@ define(function (require) {
             $(document).scrollTop(0);
         });
         
-        it('返回实例对象', function (done) {
+        it('返回实例对象', function () {
             var obj = Sticky.stick(element, setTop);
             expect(obj.destory).to.be.a('function');
         });
         
-        it('同一个接口', function (done) {
+        it('同一个接口', function () {
             expect(Sticky).to.be.a('function');
             expect(Sticky).to.be(Sticky.stick);
         });
         
-        it('默认的 marginTop 值', function (done) {
+        it('默认的 marginTop 值', function () {
             var obj = Sticky.stick(element);
             expect(obj.marginTop).to.be(0);
+        });
+        
+        it('destory 方法', function () {
+            var obj = Sticky.stick(element);
+            expect(element.data('bind-sticked')).to.be(true);
+            obj.destory();
+            expect(element.data('bind-sticked')).to.be(false);
         });
 
         it('滚动了一像素', function (done) {
