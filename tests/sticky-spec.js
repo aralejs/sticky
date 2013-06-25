@@ -9,7 +9,7 @@ define(function (require) {
     var element = null;
     var setTop = 50;
     var elementTop;
-    var timeout = 0;
+    var timeout = 30;
 
     var Sticky = require('sticky');
 
@@ -42,18 +42,15 @@ define(function (require) {
             $(document).scrollTop(500);
 
             setTimeout(function () {
-                if (isPositionStickySupported) {
-                    expect(element.css('position').indexOf('sticky') !== -1).to.be(true);
-                } else {
-                    expect(element.css('position')).to.be(isPositionFixedSupported ? 'fixed' : 'absolute');
-                    expect(obj._placeholder.length).to.be(1);                
-                }
+                expect(element.css('position')).to.be(isPositionFixedSupported ? 'fixed' : 'absolute');
+                expect(obj._placeholder.length).to.be(1);                
                 expect(element.offset().top).to.be(oldTop + 500);
                 done();
 
                 obj.destory();
             }, timeout);
         });
+
         it('不需要占位符的 fixed 元素', function (done) {
             element.css("position", "absolute");
 
@@ -272,12 +269,11 @@ define(function (require) {
             $(document).scrollTop(elementTop + 300);
 
             setTimeout(function () {
-                console.log(element.css('position'));
                 expect(element.css('position').indexOf("sticky") !== -1 || element.css('position') === "static").to.be(true);
                 $(document).scrollTop(0);
 
                 setTimeout(function() {
-                    expect(element.css('position') === "static").to.be(true);
+                    expect(element.css('position').indexOf("sticky") !== -1 || element.css('position') === "static").to.be(true);
                     done();
                     obj.destory();
                 }, timeout);

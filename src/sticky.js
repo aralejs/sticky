@@ -37,6 +37,12 @@ define(function (require, exports, module) {
         // 记录元素原来的位置
         this._originTop = this.elem.offset().top;
 
+        // 表示需要 fixed，不能用 position:sticky 来实现
+        if (this.marginTop === Number.MAX_VALUE) {
+            var callFix = true;    // 表示调用了 sticky.fix
+            this.marginTop = this._originTop;
+        }
+
         this._originStyles = {
             position: null,
             top: null,
@@ -51,7 +57,8 @@ define(function (require, exports, module) {
         }
 
         var scrollFn;
-        if (sticky.isPositionStickySupported) {
+        // sticky.fix 无法用 sticky 方式来实现
+        if (sticky.isPositionStickySupported && !callFix) {
             scrollFn = this._supportSticky;        
         } else if (sticky.isPositionFixedSupported) {
             scrollFn = this._supportFixed;            
@@ -96,11 +103,10 @@ define(function (require, exports, module) {
                 left: this.elem.offset().left
             });
             this.elem.data('sticked', true);
+            this.callback.call(this, true);
         } else if (this.elem.data('sticked') && distance > this.marginTop) {
             this._restore();
         }
-        // 元素状态传递给回调
-        this.callback.call(this, this.elem.data('sticked'));        
     };
 
     Sticky.prototype._supportAbsolute = function () {
@@ -110,17 +116,19 @@ define(function (require, exports, module) {
         // 当距离小于等于预设的值时
         // 将元素设为 fixed 状态
         if (distance <= this.marginTop) {
-            this._addPlaceholder();
-
+            // 状态变化只有一次
+            if (!this.elem.data('sticked')) {
+                this._addPlaceholder();
+                this.elem.data('sticked', true);
+                this.callback.call(this, true);
+            }
             this.elem.css({
                 position: 'absolute',
                 top: this.marginTop + doc.scrollTop()
             });
-            this.elem.data('sticked', true);
         } else if (this.elem.data('sticked') && distance > this.marginTop) {
             this._restore();
         }
-        this.callback.call(this, this.elem.data('sticked'));
     };
 
     Sticky.prototype._supportSticky = function () {        
@@ -137,10 +145,10 @@ define(function (require, exports, module) {
 
         if (!this.elem.data('sticked') && distance <= this.marginTop) {
             this.elem.data('sticked', true);
+            this.callback.call(this, true);            
         } else if (this.elem.data('sticked') && distance > this.marginTop) {
             this.callback.call(this, false);    // 不需要恢复样式和去占位符
         }
-        this.callback.call(this, this.elem.data('sticked'));        
     };
 
     Sticky.prototype._restore = function () {
@@ -151,6 +159,8 @@ define(function (require, exports, module) {
         
         // 设置元素状态
         this.elem.data('sticked', false);
+    
+        this.callback.call(this, false);
     };
 
     // 需要占位符的情况有: 1) position: static or relative; 但除了 display 不是 block
