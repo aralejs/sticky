@@ -199,7 +199,6 @@ define("arale/sticky/1.2.1/sticky-debug", [ "$-debug" ], function(require, expor
             el.parentNode.removeChild(el);
             return isSupported;
         }
-        return false;
     }
     function indexOf(array, item) {
         if (array == null) return -1;
