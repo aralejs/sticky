@@ -230,7 +230,7 @@ define(function (require) {
             $(document).scrollTop(elementTop + 300);
 
             setTimeout(function () {
-                expect(element.css('position')).to.be("static");
+                expect(element.css('position').indexOf("sticky") !== -1 || element.css('position') === "static").to.be(true);
                 done();
                 element.show();
                 obj.destory();

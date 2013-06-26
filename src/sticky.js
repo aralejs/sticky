@@ -59,7 +59,16 @@ define(function (require, exports, module) {
         var scrollFn;
         // sticky.fix 无法用 sticky 方式来实现
         if (sticky.isPositionStickySupported && !callFix) {
-            scrollFn = this._supportSticky;        
+            scrollFn = this._supportSticky;
+
+            // 直接设置 sticky 的样式属性
+            var tmp = "";
+            for (var i = 0; i < stickyPrefix.length; i++) {
+                tmp += "position:" + stickyPrefix[i] + "sticky;";
+            }
+            this.elem[0].style.cssText += tmp + "top: " + this.marginTop + "px;";
+
+
         } else if (sticky.isPositionFixedSupported) {
             scrollFn = this._supportFixed;            
         } else {
@@ -132,13 +141,6 @@ define(function (require, exports, module) {
     };
 
     Sticky.prototype._supportSticky = function () {        
-        // 直接设置 sticky 的样式属性
-        var tmp = "";
-        for (var i = 0; i < stickyPrefix.length; i++) {
-            tmp += "position:" + stickyPrefix[i] + "sticky;";
-        }
-        this.elem[0].style.cssText += tmp + "top: " + this.marginTop + "px;";
-
         // 由于 position:sticky 尚未提供接口判断状态
         // 因此仍然要计算 distance 以便进行回调
         var distance = this._originTop - doc.scrollTop();

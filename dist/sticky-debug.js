@@ -42,6 +42,12 @@ define("arale/sticky/1.2.1/sticky-debug", [ "$-debug" ], function(require, expor
         // sticky.fix 无法用 sticky 方式来实现
         if (sticky.isPositionStickySupported && !callFix) {
             scrollFn = this._supportSticky;
+            // 直接设置 sticky 的样式属性
+            var tmp = "";
+            for (var i = 0; i < stickyPrefix.length; i++) {
+                tmp += "position:" + stickyPrefix[i] + "sticky;";
+            }
+            this.elem[0].style.cssText += tmp + "top: " + this.marginTop + "px;";
         } else if (sticky.isPositionFixedSupported) {
             scrollFn = this._supportFixed;
         } else {
@@ -105,12 +111,6 @@ define("arale/sticky/1.2.1/sticky-debug", [ "$-debug" ], function(require, expor
         }
     };
     Sticky.prototype._supportSticky = function() {
-        // 直接设置 sticky 的样式属性
-        var tmp = "";
-        for (var i = 0; i < stickyPrefix.length; i++) {
-            tmp += "position:" + stickyPrefix[i] + "sticky;";
-        }
-        this.elem[0].style.cssText += tmp + "top: " + this.marginTop + "px;";
         // 由于 position:sticky 尚未提供接口判断状态
         // 因此仍然要计算 distance 以便进行回调
         var distance = this._originTop - doc.scrollTop();
@@ -129,10 +129,11 @@ define("arale/sticky/1.2.1/sticky-debug", [ "$-debug" ], function(require, expor
         this.elem.data("sticked", false);
         this.callback.call(this, false);
     };
-    // 需要占位符的情况有: 1) position: static or relative; 但除了 display 不是 block
+    // 需要占位符的情况有: 1) position: static or relative，除了 display 不是 block 的情况
     Sticky.prototype._addPlaceholder = function() {
         var need = false;
-        if (indexOf([ "static", "relative" ], this.elem.css("position")) !== -1) {
+        var position = this.elem.css("position");
+        if (position === "static" || position === "relative") {
             need = true;
         }
         if (this.elem.css("display") !== "block") {
@@ -199,12 +200,5 @@ define("arale/sticky/1.2.1/sticky-debug", [ "$-debug" ], function(require, expor
             el.parentNode.removeChild(el);
             return isSupported;
         }
-    }
-    function indexOf(array, item) {
-        if (array == null) return -1;
-        var nativeIndexOf = Array.prototype.indexOf;
-        if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
-        for (var i = 0; i < array.length; i++) if (array[i] === item) return i;
-        return -1;
     }
 });
