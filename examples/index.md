@@ -21,7 +21,7 @@
     z-index: 1;
     text-align: center;
 }
-#nav, #gotop, #bottom {
+#nav, #gotop {
     position: absolute;
     height: 30px;
     line-height: 30px;
@@ -39,11 +39,6 @@
     left: 0;
     top: 0;
     width: 100%;
-}
-#bottom {
-    width: 100%;
-    left: 0;
-    bottom: 0;
 }
 </style>
 
@@ -69,9 +64,6 @@ seajs.use(["$", "sticky"], function($, sticky) {
 
     $('<div id="nav">顶层fixed导航</div>').appendTo("body");
     sticky.fix("#nav");
-
-    $('<div id="bottom">footer fixed</div>').appendTo("body");
-    sticky.fix("#bottom");
 });
 ````
     
