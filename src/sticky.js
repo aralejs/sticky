@@ -149,6 +149,8 @@ define(function (require, exports, module) {
             this.elem.data('sticked', true);
             this.callback.call(this, true);            
         } else if (this.elem.data('sticked') && distance > this.marginTop) {
+            this.elem.data('sticked', false);
+
             this.callback.call(this, false);    // 不需要恢复样式和去占位符
         }
     };
