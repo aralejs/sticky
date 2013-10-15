@@ -47,6 +47,12 @@ seajs.use(["$", "sticky"], function($, sticky) {
 >  3) 对于 ``position: static or relative`` 且 ``display`` 不为 ``none`` 的情况下, 会在当前元素后面插入宽高与元素相同的占位符.
 
 
+返回为 Sticky 实例对象, 具有以下成员和方法:
+
+- `this.elem` 当前元素, 即上述的 `element`
+
+- `this.adjust()` 用于当 sticky 元素被动改变位置时, 导致其 offsetTop 改变, 从而需要手工调用该方法来调整 sticky 元素状态. 自动检测元素位置改变实现太复杂, 这里简略处理.
+
 ### Sticky.fixed(element)
 
 ```javascript

@@ -34,8 +34,18 @@ define(function (require, exports, module) {
             return;
         }
 
+        this.adjust = function() {
+            self._restore();
+
+            var offset = self.elem.offset();
+            self._originTop = offset.top;
+            self._originLeft = offset.left;
+            scrollFn.call(self);
+        };
         // 记录元素原来的位置
-        this._originTop = this.elem.offset().top;
+        var offset = this.elem.offset();
+        this._originTop = offset.top;
+        this._originLeft = offset.left;
 
         // 表示需要 fixed，不能用 position:sticky 来实现
         if (this.marginTop === Number.MAX_VALUE) {
@@ -69,8 +79,12 @@ define(function (require, exports, module) {
             this.elem[0].style.cssText += tmp + "top: " + this.marginTop + "px;";
 
 
+            // position: sticky, 默认就支持元素位置的动态改变
+            this.adjust = function() {
+                scrollFn.call(self);
+            };
         } else if (sticky.isPositionFixedSupported) {
-            scrollFn = this._supportFixed;            
+            scrollFn = this._supportFixed;
         } else {
             scrollFn = this._supportAbsolute;   // ie6
             // avoid floatImage Shake for IE6
@@ -94,6 +108,7 @@ define(function (require, exports, module) {
 
         // 标记已定位
         this.elem.data('bind-sticked', true);
+
         return this;
     };
 
@@ -109,7 +124,7 @@ define(function (require, exports, module) {
             this.elem.css({
                 position: 'fixed',
                 top: this.marginTop,
-                left: this.elem.offset().left
+                left: this._originLeft
             });
             this.elem.data('sticked', true);
             this.callback.call(this, true);
@@ -143,7 +158,7 @@ define(function (require, exports, module) {
     Sticky.prototype._supportSticky = function () {        
         // 由于 position:sticky 尚未提供接口判断状态
         // 因此仍然要计算 distance 以便进行回调
-        var distance = this._originTop - doc.scrollTop();
+        var distance = this.elem.offset().top - doc.scrollTop();
 
         if (!this.elem.data('sticked') && distance <= this.marginTop) {
             this.elem.data('sticked', true);

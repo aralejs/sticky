@@ -46,17 +46,22 @@
 
 <div id="stick">跟随滚动的测试元素。</div>
 
-
 ````javascript
 seajs.use(["$", "sticky"], function($, sticky) {
     // sticky
-    sticky("#stick", 30, function(status) {
+    var st = sticky("#stick", 30, function(status) {
         if (status) {
-            seajs.log("stick");
+            console.log("stick");
         } else {
-            seajs.log("unstick");
+            console.log("unstick");
         }
     });
+
+    setTimeout(function() {
+        $('.help').height(800);
+
+        st.adjust();
+    }, 6000);
 
     // fixed
     $('<div id="gotop">回到顶部</div>').appendTo("body");
@@ -67,4 +72,6 @@ seajs.use(["$", "sticky"], function($, sticky) {
 });
 ````
     
-<div class="help" style="height: 1500px; line-height: 1500px;">撑高度的元素。</div>
+<div class="help" style="height: 800px; line-height: 800px;">撑高度的元素。</div>
+
+

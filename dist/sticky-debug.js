@@ -1,4 +1,4 @@
-define("arale/sticky/1.2.1/sticky-debug", [ "$-debug" ], function(require, exports, module) {
+define("arale/sticky/1.2.2/sticky-debug", [ "$-debug" ], function(require, exports, module) {
     var $ = require("$-debug"), doc = $(document), stickyPrefix = [ "-webkit-", "-ms-", "-o-", "-moz-", "" ], guid = 0, // 只需判断是否是 IE 和 IE6
     ua = (window.navigator.userAgent || "").toLowerCase(), isIE = ua.indexOf("msie") !== -1, isIE6 = ua.indexOf("msie 6") !== -1;
     var isPositionStickySupported = checkPositionStickySupported(), isPositionFixedSupported = checkPositionFixedSupported();
@@ -19,8 +19,17 @@ define("arale/sticky/1.2.1/sticky-debug", [ "$-debug" ], function(require, expor
         if (!this.elem.length || this.elem.data("bind-sticked")) {
             return;
         }
+        this.adjust = function() {
+            self._restore();
+            var offset = self.elem.offset();
+            self._originTop = offset.top;
+            self._originLeft = offset.left;
+            scrollFn.call(self);
+        };
         // 记录元素原来的位置
-        this._originTop = this.elem.offset().top;
+        var offset = this.elem.offset();
+        this._originTop = offset.top;
+        this._originLeft = offset.left;
         // 表示需要 fixed，不能用 position:sticky 来实现
         if (this.marginTop === Number.MAX_VALUE) {
             var callFix = true;
@@ -48,6 +57,10 @@ define("arale/sticky/1.2.1/sticky-debug", [ "$-debug" ], function(require, expor
                 tmp += "position:" + stickyPrefix[i] + "sticky;";
             }
             this.elem[0].style.cssText += tmp + "top: " + this.marginTop + "px;";
+            // position: sticky, 默认就支持元素位置的动态改变
+            this.adjust = function() {
+                scrollFn.call(self);
+            };
         } else if (sticky.isPositionFixedSupported) {
             scrollFn = this._supportFixed;
         } else {
@@ -82,7 +95,7 @@ define("arale/sticky/1.2.1/sticky-debug", [ "$-debug" ], function(require, expor
             this.elem.css({
                 position: "fixed",
                 top: this.marginTop,
-                left: this.elem.offset().left
+                left: this._originLeft
             });
             this.elem.data("sticked", true);
             this.callback.call(this, true);
@@ -113,11 +126,12 @@ define("arale/sticky/1.2.1/sticky-debug", [ "$-debug" ], function(require, expor
     Sticky.prototype._supportSticky = function() {
         // 由于 position:sticky 尚未提供接口判断状态
         // 因此仍然要计算 distance 以便进行回调
-        var distance = this._originTop - doc.scrollTop();
+        var distance = this.elem.offset().top - doc.scrollTop();
         if (!this.elem.data("sticked") && distance <= this.marginTop) {
             this.elem.data("sticked", true);
             this.callback.call(this, true);
         } else if (this.elem.data("sticked") && distance > this.marginTop) {
+            this.elem.data("sticked", false);
             this.callback.call(this, false);
         }
     };
