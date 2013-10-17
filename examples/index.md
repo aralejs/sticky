@@ -11,7 +11,7 @@
     text-align: center;
     line-height: 300px;
 }
-#stick {
+#stick, #bottom {
     background: #08c;
     color: #fff;
     width: 300px;
@@ -44,7 +44,12 @@
 
 <div class="help">撑高度的元素。</div>
 
-<div id="stick">跟随滚动的测试元素。</div>
+<div id="stick">跟随滚动的测试元素(top)</div>
+
+<div class="help">撑高度的元素。</div>
+<div class="help">撑高度的元素。</div>
+
+<div id="bottom">跟随滚动的测试元素(bottom)</div>
 
 ````javascript
 seajs.use(["$", "sticky"], function($, sticky) {
@@ -63,15 +68,26 @@ seajs.use(["$", "sticky"], function($, sticky) {
         st.adjust();
     }, 6000);
 
+
+    var st = sticky("#bottom", {
+        top: 10,
+        bottom: 10
+    }, function(status) {
+        if (status) {
+            console.log("bottom stick");
+        } else {
+            console.log("bottom unstick");
+        }
+    });
+
     // fixed
     $('<div id="gotop">回到顶部</div>').appendTo("body");
-    sticky.fix("#gotop");
+    //sticky.fix("#gotop");
 
     $('<div id="nav">顶层fixed导航</div>').appendTo("body");
-    sticky.fix("#nav");
+    //sticky.fix("#nav");
 });
 ````
-    
 <div class="help" style="height: 800px; line-height: 800px;">撑高度的元素。</div>
 
 

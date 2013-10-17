@@ -18,7 +18,7 @@
 
 ## 使用说明
 
-### Sticky(element, marginTop, callback)
+### Sticky(element, position, callback)
 
 ```javascript
 seajs.use(["$", "sticky"], function($, sticky) {
@@ -34,13 +34,21 @@ seajs.use(["$", "sticky"], function($, sticky) {
 
 `element` 是指需要跟随滚动的目标元素，接受 jQuery selector 对象。
 
-`marginTop` 指当元素距离当前可视窗口顶部的距离等于这个值时，开始触发跟随状态。
+`position` 位置对象, 取:
+
+```js
+{
+    top: 10,
+    bottom: 10
+}
+```
+设置 top 或者 bottom, 指当元素距离当前可视窗口顶部或底部的距离等于这个值时，开始触发跟随状态。
 
 `callback` 当元素更改状态之后的回调函数, 具有一个参数 status, 为 true 表示是 stick 状态, 为 false 为 unstick 状态.
 
 > 有几下三点注意:
 >
->  1) 当 `marginTop` 设置的值超过元素本身在文档中的高度时, 就变为全局 fixed 效果
+>  1) 当 `position.top` 设置的值超过元素本身在文档中的高度时, 就变为全局 fixed 效果
 >
 >  2) Sticky 对某些情况下的元素会向 DOM 中插入占位元素, 所以务必在 DOM ready 之后初始化该组件
 >

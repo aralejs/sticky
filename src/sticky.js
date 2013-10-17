@@ -1,4 +1,4 @@
-define(function (require, exports, module) {
+define(function (require, exports, module, undefined) {
 
     var $ = require("$"),
         doc = $(document),
@@ -22,7 +22,7 @@ define(function (require, exports, module) {
         this.options = options || {};
         this.elem = $(this.options.element);        
         this.callback = options.callback || function() {};
-        this.marginTop = options.marginTop || 0;
+        this.position = options.position;
         this._stickyId = guid++;
     }
 
@@ -31,7 +31,7 @@ define(function (require, exports, module) {
 
         // 一个元素只允许绑定一次
         if (!this.elem.length || this.elem.data('bind-sticked')) {
-            return;
+            return this;
         }
 
         this.adjust = function() {
@@ -40,6 +40,7 @@ define(function (require, exports, module) {
             var offset = self.elem.offset();
             self._originTop = offset.top;
             self._originLeft = offset.left;
+
             scrollFn.call(self);
         };
         // 记录元素原来的位置
@@ -48,18 +49,18 @@ define(function (require, exports, module) {
         this._originLeft = offset.left;
 
         // 表示需要 fixed，不能用 position:sticky 来实现
-        if (this.marginTop === Number.MAX_VALUE) {
+        if (this.position.top === Number.MAX_VALUE) {
             var callFix = true;    // 表示调用了 sticky.fix
-            this.marginTop = this._originTop;
+            this.position.top = this._originTop;
         }
 
+        // 保存原有的样式
         this._originStyles = {
             position: null,
             top: null,
+            bottom: null,
             left: null
         };
-
-        // 保存原有的样式
         for (var style in this._originStyles) {
             if (this._originStyles.hasOwnProperty(style)) {
                 this._originStyles[style] = this.elem.css(style);
@@ -76,8 +77,13 @@ define(function (require, exports, module) {
             for (var i = 0; i < stickyPrefix.length; i++) {
                 tmp += "position:" + stickyPrefix[i] + "sticky;";
             }
-            this.elem[0].style.cssText += tmp + "top: " + this.marginTop + "px;";
-
+            if (this.position.top !== undefined) {
+                tmp += "top: " + this.position.top + "px;";
+            }
+            if (this.position.bottom !== undefined) {
+                tmp += "bottom: " + this.position.bottom + "px;";
+            }
+            this.elem[0].style.cssText += tmp;
 
             // position: sticky, 默认就支持元素位置的动态改变
             this.adjust = function() {
@@ -155,17 +161,26 @@ define(function (require, exports, module) {
         }
     };
 
-    Sticky.prototype._supportSticky = function () {        
+    Sticky.prototype._supportSticky = function () {
         // 由于 position:sticky 尚未提供接口判断状态
-        // 因此仍然要计算 distance 以便进行回调
-        var distance = this.elem.offset().top - doc.scrollTop();
+        // 因此仍然要计算 top 以便进行回调
+        var offsetTop = this.elem.offset().top;
+        var scrollTop = doc.scrollTop();
+        var top;
+        var bottom;
+        var _sticky = this.elem.data('sticked');
 
-        if (!this.elem.data('sticked') && distance <= this.marginTop) {
+        if (this.position.top !== undefined) {
+            top = offsetTop - scrollTop <= this.position.top;
+        }
+        if (this.position.bottom !== undefined) {
+            bottom = scrollTop + $(window).height() - offsetTop - this.elem.outerHeight() <= this.position.bottom;
+        }
+        if (!_sticky && (top !== undefined && top || bottom !== undefined && bottom)) {
             this.elem.data('sticked', true);
-            this.callback.call(this, true);            
-        } else if (this.elem.data('sticked') && distance > this.marginTop) {
+            this.callback.call(this, true);
+        } else if (_sticky && (!top && !bottom)){
             this.elem.data('sticked', false);
-
             this.callback.call(this, false);    // 不需要恢复样式和去占位符
         }
     };
@@ -219,22 +234,33 @@ define(function (require, exports, module) {
 
     module.exports = sticky;
 
-    function sticky(elem, marginTop, callback) {
+    function sticky(elem, position, callback) {
+        if (!$.isPlainObject(position)) {
+            position = {
+                top: position
+            };
+        }
+        if (position.top === undefined && position.bottom === undefined) {
+            throw new Error('must set top or bottom')
+        }
         return (new Sticky({
             element: elem,
-            marginTop: marginTop || 0,
+            position: position,
             callback: callback
         })).render();
     }
 
-    // sticky.stick(elem, marginTop, callback)
+    // sticky.stick(elem, position, callback)
     sticky.stick = sticky;
 
     // sticky.fix(elem)
     sticky.fix =  function (elem) {
         return (new Sticky({
             element: elem,
-            marginTop: Number.MAX_VALUE // 无穷大的 marginTop 即表示元素永远 fixed
+            // 无穷大的 position.top 即表示元素永远 fixed
+            position: {
+                top: Number.MAX_VALUE
+            }
         })).render();
     };
 

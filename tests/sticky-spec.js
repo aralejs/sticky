@@ -357,5 +357,10 @@ define(function (require) {
         });
     });
 
+
+    describe('Sticky.stick top, bottom', function () {
+
+    });
+
 });
 
