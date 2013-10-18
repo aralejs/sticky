@@ -119,22 +119,32 @@ define(function (require, exports, module, undefined) {
     };
 
     Sticky.prototype._supportFixed = function () {
+        var scrollTop = doc.scrollTop();
+        var top;
+        var bottom;
+        var _sticky = this.elem.data('sticked');
+
         // 计算元素距离当前窗口上方的距离
-        var distance = this._originTop - doc.scrollTop();
+        if (this.position.top !== undefined) {
+            top = this._originTop - scrollTop <= this.position.top;
+        }
+        // 计算元素底部距窗口底部的距离
+        if (this.position.bottom !== undefined) {
+            bottom = scrollTop + $(window).height() - this._originTop - this.elem.outerHeight() <= this.position.bottom;
+        }
 
         // 当距离小于等于预设的值时
         // 将元素设为 fix 状态
-        if (!this.elem.data('sticked') && distance <= this.marginTop) {
+        if (!_sticky && (top !== undefined && top || bottom !== undefined && bottom)) {
             this._addPlaceholder();
 
-            this.elem.css({
+            this.elem.css($.extend({
                 position: 'fixed',
-                top: this.marginTop,
                 left: this._originLeft
-            });
+            }, top ? { top: this.position.top } : { bottom: this.position.bottom }));
             this.elem.data('sticked', true);
             this.callback.call(this, true);
-        } else if (this.elem.data('sticked') && distance > this.marginTop) {
+        } else if (_sticky && (!top && !bottom)) {
             this._restore();
         }
     };

@@ -69,7 +69,7 @@ seajs.use(["$", "sticky"], function($, sticky) {
     }, 6000);
 
 
-    var st = sticky("#bottom", {
+    var st1 = sticky("#bottom", {
         top: 10,
         bottom: 10
     }, function(status) {
