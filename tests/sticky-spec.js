@@ -9,15 +9,15 @@ define(function (require) {
     var element = null;
     var setTop = 50;
     var elementTop;
+    var elementBottom;
     var timeout = 30;
+    var tmp;
 
     var Sticky = require('sticky');
 
 
     var isPositionStickySupported = Sticky.isPositionStickySupported,
         isPositionFixedSupported = Sticky.isPositionFixedSupported;
-
-    var fakeCheckPositionStickySupported, fakeCheckPositionFixedSupported;
 
     describe('Sticky.fix', function () {
         beforeEach(function () {
@@ -34,10 +34,10 @@ define(function (require) {
             $(document).scrollTop(0);
         });
         
-        it('默认的 marginTop 值', function () {
+        it('默认的 top 值', function () {
             var originTop = element.offset().top;
             var obj = Sticky.fix(element);
-            expect(obj.marginTop).to.be(originTop);
+            expect(obj.position.top).to.be(originTop);
             obj.destory();
         });
 
@@ -94,7 +94,7 @@ define(function (require) {
 
             setTimeout(function () {
                 expect(element.data("bind-sticked")).to.be(true);
-                expect(obj2).to.be(undefined);
+                expect(obj2.adjust).to.be(undefined);
                 done();
 
                 obj1.destory();
@@ -104,13 +104,16 @@ define(function (require) {
 
     describe('Sticky.stick', function () {
         beforeEach(function () {
-            $('body').css('height', '2000px');
+            $('body').css('height', 2000);
+            tmp = $('<div style="height: 400px;"></div>').prependTo("body");
             element = $('<div>test</div>');
             element.appendTo('body');
             elementTop = element.offset().top - setTop;
+            elementBottom = element.offset().top + element.height() - $(window).height() + setTop;
         });
 
         afterEach(function () {
+            tmp.remove();
             element.remove();
             element = null;
             $('body').css('height', '');
@@ -128,9 +131,9 @@ define(function (require) {
             expect(Sticky).to.be(Sticky.stick);
         });
         
-        it('默认的 marginTop 值', function () {
+        it('默认的 top 值', function () {
             var obj = Sticky.stick(element);
-            expect(obj.marginTop).to.be(0);
+            expect(obj.position.top).to.be(0);
         });
         
         it('destory 方法', function () {
@@ -355,12 +358,68 @@ define(function (require) {
                 }, timeout);
             }, timeout);
         });
+
+        it('手工调用 adjust', function (done) {
+            var triggered = 0;
+
+            var obj = Sticky.stick(element, setTop, function(status) {
+                if (status) {
+                    triggered = 1;
+                } else {
+                    triggered = 2;
+                }
+            });
+
+            $(document).scrollTop(elementTop);
+
+            setTimeout(function () {
+                expect(triggered).to.be(1);
+
+                tmp.height(800);
+                obj.adjust();
+                expect(triggered).to.be(2);
+
+                $(document).scrollTop(elementTop + 400);
+
+                setTimeout(function () {
+                    expect(triggered).to.be(1);
+                    done();
+                    obj.destory();
+                }, timeout);
+            }, timeout);
+        });
+
+        it('set top and bottom', function(done) {
+            var triggered = 0;
+
+            var obj = Sticky.stick(element, {
+                top: setTop,
+                bottom: setTop
+            }, function(status) {
+                if (status) {
+                    triggered = 1;
+                } else {
+                    triggered = 2;
+                }
+            });
+            $(document).scrollTop(elementTop);
+
+            setTimeout(function() {
+                expect(triggered).to.be(1);
+
+                $(document).scrollTop(elementBottom + 1);
+                setTimeout(function() {
+                    expect(triggered).to.be(2);
+
+                    $(document).scrollTop(elementBottom);
+                    setTimeout(function() {
+                        expect(triggered).to.be(1);
+                        done();
+                        obj.destory();
+                    }, timeout);
+                }, timeout);
+            }, timeout);
+        });
     });
-
-
-    describe('Sticky.stick top, bottom', function () {
-
-    });
-
 });
 

@@ -1,24 +1,48 @@
-define("arale/sticky/1.2.2/sticky-debug", [ "$-debug" ], function(require, exports, module) {
-    var $ = require("$-debug"), doc = $(document), stickyPrefix = [ "-webkit-", "-ms-", "-o-", "-moz-", "" ], guid = 0, // 只需判断是否是 IE 和 IE6
-    ua = (window.navigator.userAgent || "").toLowerCase(), isIE = ua.indexOf("msie") !== -1, isIE6 = ua.indexOf("msie 6") !== -1;
+define("arale/sticky/1.2.2/sticky-debug", [ "$-debug" ], function(require, exports, module, undefined) {
+    var $ = require("$-debug"), doc = $(document), stickyPrefix = [ "-webkit-", "-ms-", "-o-", "-moz-", "" ], guid = 0, ua = (window.navigator.userAgent || "").toLowerCase(), isIE = ua.indexOf("msie") !== -1, isIE6 = ua.indexOf("msie 6") !== -1;
     var isPositionStickySupported = checkPositionStickySupported(), isPositionFixedSupported = checkPositionFixedSupported();
     // Sticky
-    // 实现侧边栏跟随滚动的效果
-    // 当滚动条滚动到一定距离时，指定区域变为 sticky 效果开始跟随页面
-    // ---
+    // position: sticky simulator
     function Sticky(options) {
         this.options = options || {};
         this.elem = $(this.options.element);
         this.callback = options.callback || function() {};
-        this.marginTop = options.marginTop || 0;
+        this.position = options.position;
         this._stickyId = guid++;
     }
+    Sticky.prototype._prepare = function() {
+        // save element's origin position
+        var offset = this.elem.offset();
+        this._originTop = offset.top;
+        this._originLeft = offset.left;
+        // if is fixed, force to call this_supportFixed
+        if (this.position.top === Number.MAX_VALUE) {
+            this._callFix = true;
+            this.position.top = this._originTop;
+        }
+        // save element's origin style
+        this._originStyles = {
+            position: null,
+            top: null,
+            bottom: null,
+            left: null
+        };
+        for (var style in this._originStyles) {
+            if (this._originStyles.hasOwnProperty(style)) {
+                this._originStyles[style] = this.elem.css(style);
+            }
+        }
+    };
     Sticky.prototype.render = function() {
         var self = this;
-        // 一个元素只允许绑定一次
+        // only bind once
         if (!this.elem.length || this.elem.data("bind-sticked")) {
-            return;
+            return this;
         }
+        this._prepare();
+        // if other element change height in one page,
+        // or if resize window,
+        // need adjust sticky element's status
         this.adjust = function() {
             self._restore();
             var offset = self.elem.offset();
@@ -26,38 +50,21 @@ define("arale/sticky/1.2.2/sticky-debug", [ "$-debug" ], function(require, expor
             self._originLeft = offset.left;
             scrollFn.call(self);
         };
-        // 记录元素原来的位置
-        var offset = this.elem.offset();
-        this._originTop = offset.top;
-        this._originLeft = offset.left;
-        // 表示需要 fixed，不能用 position:sticky 来实现
-        if (this.marginTop === Number.MAX_VALUE) {
-            var callFix = true;
-            // 表示调用了 sticky.fix
-            this.marginTop = this._originTop;
-        }
-        this._originStyles = {
-            position: null,
-            top: null,
-            left: null
-        };
-        // 保存原有的样式
-        for (var style in this._originStyles) {
-            if (this._originStyles.hasOwnProperty(style)) {
-                this._originStyles[style] = this.elem.css(style);
-            }
-        }
         var scrollFn;
-        // sticky.fix 无法用 sticky 方式来实现
-        if (sticky.isPositionStickySupported && !callFix) {
+        if (sticky.isPositionStickySupported && !this._callFix) {
             scrollFn = this._supportSticky;
-            // 直接设置 sticky 的样式属性
+            // set position: sticky directly
             var tmp = "";
             for (var i = 0; i < stickyPrefix.length; i++) {
                 tmp += "position:" + stickyPrefix[i] + "sticky;";
             }
-            this.elem[0].style.cssText += tmp + "top: " + this.marginTop + "px;";
-            // position: sticky, 默认就支持元素位置的动态改变
+            if (this.position.top !== undefined) {
+                tmp += "top: " + this.position.top + "px;";
+            }
+            if (this.position.bottom !== undefined) {
+                tmp += "bottom: " + this.position.bottom + "px;";
+            }
+            this.elem[0].style.cssText += tmp;
             this.adjust = function() {
                 scrollFn.call(self);
             };
@@ -71,79 +78,92 @@ define("arale/sticky/1.2.2/sticky-debug", [ "$-debug" ], function(require, expor
             //      github.com/blob/master/lab/2009/ie6sticked_position_v4.html
             $("<style type='text/css'> * html" + "{ background:url(null) no-repeat fixed; } </style>").appendTo("head");
         }
-        // 先运行一次
+        // first run after document ready
         scrollFn.call(this);
-        // 监听滚动事件
-        // fixed 是本模块绑定的滚动事件的命名空间
-        $(window).on("scroll." + this._stickyId, function() {
-            if (!self.elem.is(":visible")) {
-                return;
-            }
+        // stickyX is event namespace
+        $(window).on("scroll.sticky" + this._stickyId, function() {
+            if (!self.elem.is(":visible")) return;
             scrollFn.call(self);
         });
-        // 标记已定位
         this.elem.data("bind-sticked", true);
         return this;
     };
+    Sticky.prototype._getTopBottom = function(scrollTop, offsetTop) {
+        var top;
+        var bottom;
+        // top is true when the distance from element to top of window <= position.top
+        if (this.position.top !== undefined) {
+            top = offsetTop - scrollTop <= this.position.top;
+        }
+        // bottom is true when the  is distance from bottom of element to bottom of window <= position.bottom
+        if (this.position.bottom !== undefined) {
+            bottom = scrollTop + $(window).height() - offsetTop - this.elem.outerHeight() <= this.position.bottom;
+        }
+        return {
+            top: top,
+            bottom: bottom
+        };
+    };
     Sticky.prototype._supportFixed = function() {
-        // 计算元素距离当前窗口上方的距离
-        var distance = this._originTop - doc.scrollTop();
-        // 当距离小于等于预设的值时
-        // 将元素设为 fix 状态
-        if (!this.elem.data("sticked") && distance <= this.marginTop) {
+        var _sticky = this.elem.data("sticked");
+        var distance = this._getTopBottom(doc.scrollTop(), this._originTop);
+        if (!_sticky && (distance.top !== undefined && distance.top || distance.bottom !== undefined && distance.bottom)) {
             this._addPlaceholder();
-            this.elem.css({
+            this.elem.css($.extend({
                 position: "fixed",
-                top: this.marginTop,
                 left: this._originLeft
-            });
+            }, distance.top ? {
+                top: this.position.top
+            } : {
+                bottom: this.position.bottom
+            }));
             this.elem.data("sticked", true);
             this.callback.call(this, true);
-        } else if (this.elem.data("sticked") && distance > this.marginTop) {
+        } else if (_sticky && !distance.top && !distance.bottom) {
             this._restore();
         }
     };
     Sticky.prototype._supportAbsolute = function() {
-        // 计算元素距离当前窗口上方的距离
-        var distance = this._originTop - doc.scrollTop();
-        // 当距离小于等于预设的值时
-        // 将元素设为 fixed 状态
-        if (distance <= this.marginTop) {
-            // 状态变化只有一次
-            if (!this.elem.data("sticked")) {
+        var scrollTop = doc.scrollTop();
+        var _sticky = this.elem.data("sticked");
+        var distance = this._getTopBottom(scrollTop, this.elem.offset().top);
+        if (distance.top || distance.bottom || this._callFix) {
+            // sticky status change only one time
+            if (!_sticky) {
                 this._addPlaceholder();
                 this.elem.data("sticked", true);
                 this.callback.call(this, true);
             }
+            // update element's position
             this.elem.css({
                 position: "absolute",
-                top: this.marginTop + doc.scrollTop()
+                top: this._callFix ? this._originTop + scrollTop : distance.top ? this.position.top + scrollTop : scrollTop + $(window).height() - this.position.bottom - this.elem.outerHeight()
             });
-        } else if (this.elem.data("sticked") && distance > this.marginTop) {
+        } else if (_sticky && !distance.top && !distance.bottom) {
             this._restore();
         }
     };
     Sticky.prototype._supportSticky = function() {
-        // 由于 position:sticky 尚未提供接口判断状态
-        // 因此仍然要计算 distance 以便进行回调
-        var distance = this.elem.offset().top - doc.scrollTop();
-        if (!this.elem.data("sticked") && distance <= this.marginTop) {
+        // sticky status change for callback
+        var _sticky = this.elem.data("sticked");
+        var distance = this._getTopBottom(doc.scrollTop(), this.elem.offset().top);
+        if (!_sticky && (distance.top !== undefined && distance.top || distance.bottom !== undefined && distance.bottom)) {
             this.elem.data("sticked", true);
             this.callback.call(this, true);
-        } else if (this.elem.data("sticked") && distance > this.marginTop) {
+        } else if (_sticky && !distance.top && !distance.bottom) {
+            // don't need restore style and remove placeholder
             this.elem.data("sticked", false);
             this.callback.call(this, false);
         }
     };
     Sticky.prototype._restore = function() {
         this._removePlaceholder();
-        // 恢复原有的样式
+        // set origin style
         this.elem.css(this._originStyles);
-        // 设置元素状态
         this.elem.data("sticked", false);
         this.callback.call(this, false);
     };
-    // 需要占位符的情况有: 1) position: static or relative，除了 display 不是 block 的情况
+    // need placeholder when: 1) position: static or relative, but expect for display != block
     Sticky.prototype._addPlaceholder = function() {
         var need = false;
         var position = this.elem.css("position");
@@ -154,40 +174,50 @@ define("arale/sticky/1.2.2/sticky-debug", [ "$-debug" ], function(require, expor
             need = false;
         }
         if (need) {
-            // 添加占位符
             this._placeholder = $('<div style="visibility:hidden;margin:0;padding:0;"></div>');
             this._placeholder.width(this.elem.outerWidth(true)).height(this.elem.outerHeight(true)).css("float", this.elem.css("float")).insertAfter(this.elem);
         }
     };
     Sticky.prototype._removePlaceholder = function() {
-        // 如果后面有占位符的话, 删除掉
+        // remove placeholder if has
         this._placeholder && this._placeholder.remove();
     };
     Sticky.prototype.destory = function() {
         this._restore();
         this.elem.data("bind-sticked", false);
-        $(window).off("scroll." + this._stickyId);
+        $(window).off("scroll.sticky" + this._stickyId);
     };
-    // 接口们
+    // APIs
     // ---
     module.exports = sticky;
-    function sticky(elem, marginTop, callback) {
+    function sticky(elem, position, callback) {
+        if (!$.isPlainObject(position)) {
+            position = {
+                top: position
+            };
+        }
+        if (position.top === undefined && position.bottom === undefined) {
+            position.top = 0;
+        }
         return new Sticky({
             element: elem,
-            marginTop: marginTop || 0,
+            position: position,
             callback: callback
         }).render();
     }
-    // sticky.stick(elem, marginTop, callback)
+    // sticky.stick(elem, position, callback)
     sticky.stick = sticky;
     // sticky.fix(elem)
     sticky.fix = function(elem) {
         return new Sticky({
             element: elem,
-            marginTop: Number.MAX_VALUE
+            // position.top is Number.MAX_VALUE means fixed
+            position: {
+                top: Number.MAX_VALUE
+            }
         }).render();
     };
-    // 便于写测试用例
+    // for tc
     sticky.isPositionStickySupported = isPositionStickySupported;
     sticky.isPositionFixedSupported = isPositionFixedSupported;
     // Helper

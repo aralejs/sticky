@@ -250,7 +250,7 @@ define(function (require, exports, module, undefined) {
             };
         }
         if (position.top === undefined && position.bottom === undefined) {
-            throw new Error('must set top or bottom')
+            position.top = 0;
         }
         return (new Sticky({
             element: elem,
