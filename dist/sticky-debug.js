@@ -1,4 +1,4 @@
-define("arale/sticky/1.2.2/sticky-debug", [ "$-debug" ], function(require, exports, module, undefined) {
+define("arale/sticky/1.3.0/sticky-debug", [ "$-debug" ], function(require, exports, module, undefined) {
     var $ = require("$-debug"), doc = $(document), stickyPrefix = [ "-webkit-", "-ms-", "-o-", "-moz-", "" ], guid = 0, ua = (window.navigator.userAgent || "").toLowerCase(), isIE = ua.indexOf("msie") !== -1, isIE6 = ua.indexOf("msie 6") !== -1;
     var isPositionStickySupported = checkPositionStickySupported(), isPositionFixedSupported = checkPositionFixedSupported();
     // Sticky
