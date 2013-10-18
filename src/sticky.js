@@ -106,6 +106,7 @@ define(function (require, exports, module, undefined) {
         // 监听滚动事件
         // fixed 是本模块绑定的滚动事件的命名空间
         $(window).on('scroll.' + this._stickyId, function () {
+            console.log(self.elem.is(':visible'))
             if (!self.elem.is(':visible')) {
                 return;
             }
@@ -141,32 +142,44 @@ define(function (require, exports, module, undefined) {
             this.elem.css($.extend({
                 position: 'fixed',
                 left: this._originLeft
-            }, top ? { top: this.position.top } : { bottom: this.position.bottom }));
+            }, this.position.top !== undefined ? { top: this.position.top } : { bottom: this.position.bottom }));
             this.elem.data('sticked', true);
             this.callback.call(this, true);
-        } else if (_sticky && (!top && !bottom)) {
+        } else if (_sticky && !top && !bottom) {
             this._restore();
         }
     };
 
     Sticky.prototype._supportAbsolute = function () {
+        var scrollTop = doc.scrollTop();
+        var top;
+        var bottom;
+        var _sticky = this.elem.data('sticked');
+
         // 计算元素距离当前窗口上方的距离
-        var distance = this._originTop - doc.scrollTop();
+        if (this.position.top !== undefined) {
+            top = this._originTop - scrollTop <= this.position.top;
+        }
+        // 计算元素底部距窗口底部的距离
+        if (this.position.bottom !== undefined) {
+            bottom = scrollTop + $(window).height() - this._originTop - this.elem.outerHeight() <= this.position.bottom;
+        }
 
         // 当距离小于等于预设的值时
         // 将元素设为 fixed 状态
-        if (distance <= this.marginTop) {
+        if (top || bottom) {
             // 状态变化只有一次
-            if (!this.elem.data('sticked')) {
+            if (!_sticky) {
                 this._addPlaceholder();
                 this.elem.data('sticked', true);
                 this.callback.call(this, true);
             }
             this.elem.css({
                 position: 'absolute',
-                top: this.marginTop + doc.scrollTop()
+                top: top ? this.position.top + doc.scrollTop() :
+                    scrollTop + $(window).height() - this.position.bottom - this.elem.outerHeight()
             });
-        } else if (this.elem.data('sticked') && distance > this.marginTop) {
+        } else if (_sticky && !top && !bottom) {
             this._restore();
         }
     };
@@ -189,7 +202,7 @@ define(function (require, exports, module, undefined) {
         if (!_sticky && (top !== undefined && top || bottom !== undefined && bottom)) {
             this.elem.data('sticked', true);
             this.callback.call(this, true);
-        } else if (_sticky && (!top && !bottom)){
+        } else if (_sticky && !top && !bottom){
             this.elem.data('sticked', false);
             this.callback.call(this, false);    // 不需要恢复样式和去占位符
         }
@@ -281,10 +294,12 @@ define(function (require, exports, module, undefined) {
     // Helper
     // ---
     function checkPositionFixedSupported() {
+        return false;
         return !isIE6;
     }
 
     function checkPositionStickySupported() {
+        return false;
         if (isIE) return false;
 
         var container = doc[0].body;
