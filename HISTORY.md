@@ -6,7 +6,7 @@
 
 `tag:fixed` [#17](https://github.com/aralejs/sticky/issues/17), 添加 `adjust` 方法用于当元素被动改变位置时, 导致滚动条改变, 从而需要调整当前 sticky 元素状态
 
-`tag:change` [#18](https://github.com/aralejs/sticky/issues/18), 模拟页面底部 sticky 的需求, 调整 API
+`tag:changed` [#18](https://github.com/aralejs/sticky/issues/18), 模拟页面底部 sticky 的需求, 调整 API
 
 ## 1.2.1
 

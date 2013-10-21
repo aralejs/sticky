@@ -11,7 +11,7 @@ define(function (require) {
     var elementTop;
     var elementBottom;
     var timeout = 30;
-    var tmp;
+    var tmp1, tmp2, tmpHeight = 1200;
 
     var Sticky = require('sticky');
 
@@ -104,16 +104,17 @@ define(function (require) {
 
     describe('Sticky.stick', function () {
         beforeEach(function () {
-            $('body').css('height', 2000);
-            tmp = $('<div style="height: 400px;"></div>').prependTo("body");
+            tmp1 = $('<div style="border: 1px dashed red;"></div>').height(1200).prependTo("body");
             element = $('<div>test</div>');
             element.appendTo('body');
             elementTop = element.offset().top - setTop;
             elementBottom = element.offset().top + element.height() - $(window).height() + setTop;
+            tmp2 = $('<div style="border: 1px dashed red;"></div>').height(1200).appendTo("body");
         });
 
         afterEach(function () {
-            tmp.remove();
+            tmp1.remove();
+            tmp2.remove();
             element.remove();
             element = null;
             $('body').css('height', '');
@@ -375,11 +376,10 @@ define(function (require) {
             setTimeout(function () {
                 expect(triggered).to.be(1);
 
-                tmp.height(800);
+                tmp1.css('height', tmpHeight + 200);
                 obj.adjust();
                 expect(triggered).to.be(2);
-
-                $(document).scrollTop(elementTop + 400);
+                $(document).scrollTop(elementTop + 200);
 
                 setTimeout(function () {
                     expect(triggered).to.be(1);
