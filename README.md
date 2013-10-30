@@ -42,7 +42,8 @@ seajs.use(["$", "sticky"], function($, sticky) {
     bottom: 10
 }
 ```
-设置 top 或者 bottom, 指当元素距离当前可视窗口顶部或底部的距离等于这个值时，开始触发跟随状态。
+设置 top 或者 bottom, 指当元素距离当前可视窗口顶部或底部的距离等于这个值时, 开始触发跟随状态.
+当 `position` 取一整型数值时, 等价于 `position` 取 `{ top: x }`
 
 `callback` 当元素更改状态之后的回调函数, 具有一个参数 status, 为 true 表示是 stick 状态, 为 false 为 unstick 状态.
 
