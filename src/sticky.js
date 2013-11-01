@@ -112,9 +112,9 @@ define(function (require, exports, module, undefined) {
             scrollFn.call(self);
         });
 
-        $(window).resize(debounce(function() {
+        $(window).on('resize.sticky' + this._stickyId, debounce(function() {
             self.adjust();
-        }, 200));
+        }, 120));
 
         this.elem.data('bind-sticked', true);
 
@@ -240,6 +240,7 @@ define(function (require, exports, module, undefined) {
         this._restore(true);
         this.elem.data("bind-sticked", false);
         $(window).off('scroll.sticky' + this._stickyId);
+        $(window).off('resize.sticky' + this._stickyId);
     };
 
     // APIs

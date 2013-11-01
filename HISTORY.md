@@ -4,7 +4,7 @@
 
 ## 1.3.1
 
-`tag:fixed` [#19](https://github.com/aralejs/sticky/issues/19),
+`tag:fixed` [#19](https://github.com/aralejs/sticky/issues/19), 绑定 window 的 resize 事件
 
 `tag:changed` `destory` -> `destroy`
 
