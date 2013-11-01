@@ -38,7 +38,7 @@ define(function (require) {
             var originTop = element.offset().top;
             var obj = Sticky.fix(element);
             expect(obj.position.top).to.be(originTop);
-            obj.destory();
+            obj.destroy();
         });
 
         it('fixed 元素, 滚动 500 像素', function (done) {
@@ -54,7 +54,7 @@ define(function (require) {
                 expect(element.offset().top).to.be(oldTop + 500);
                 done();
 
-                obj.destory();
+                obj.destroy();
             }, timeout);
         });
 
@@ -67,7 +67,7 @@ define(function (require) {
             setTimeout(function () {
                 expect(obj._placeholder).to.be(undefined);
                 done();
-                obj.destory();
+                obj.destroy();
             }, timeout);
         });
         
@@ -80,7 +80,7 @@ define(function (require) {
             setTimeout(function () {
                 expect(obj._placeholder.length).to.be(1);
                 done();
-                obj.destory();
+                obj.destroy();
             }, timeout);
 
         });
@@ -97,7 +97,7 @@ define(function (require) {
                 expect(obj2.adjust).to.be(undefined);
                 done();
 
-                obj1.destory();
+                obj1.destroy();
             }, timeout);
         });
     });
@@ -124,7 +124,7 @@ define(function (require) {
         
         it('返回实例对象', function () {
             var obj = Sticky.stick(element, setTop);
-            expect(obj.destory).to.be.a('function');
+            expect(obj.destroy).to.be.a('function');
         });
         
         it('同一个接口', function () {
@@ -137,10 +137,10 @@ define(function (require) {
             expect(obj.position.top).to.be(0);
         });
         
-        it('destory 方法', function () {
+        it('destroy 方法', function () {
             var obj = Sticky.stick(element);
             expect(element.data('bind-sticked')).to.be(true);
-            obj.destory();
+            obj.destroy();
             expect(element.data('bind-sticked')).to.be(false);
         });
 
@@ -156,7 +156,7 @@ define(function (require) {
                     expect(element.css('position')).to.be(originPosition);
                 }
                 done();
-                obj.destory();
+                obj.destroy();
             }, timeout);
         });
 
@@ -172,7 +172,7 @@ define(function (require) {
                     expect(element.css('position')).to.be(originPosition);
                 }
                 done();
-                obj.destory();
+                obj.destroy();
             }, timeout);
         });
 
@@ -189,7 +189,7 @@ define(function (require) {
                     expect(element.css('position')).to.be("absolute");
                 }
                 done();
-                obj.destory();
+                obj.destroy();
             }, timeout);
         });
 
@@ -206,7 +206,7 @@ define(function (require) {
                     expect(element.css('position')).to.be("absolute");
                 }
                 done();
-                obj.destory();
+                obj.destroy();
             }, timeout);
 
         });
@@ -224,7 +224,7 @@ define(function (require) {
                     expect(element.css('position')).to.be("absolute");
                 }
                 done();
-                obj.destory();
+                obj.destroy();
             }, timeout);
         });
 
@@ -237,7 +237,7 @@ define(function (require) {
                 expect(element.css('position').indexOf("sticky") !== -1 || element.css('position') === "static").to.be(true);
                 done();
                 element.show();
-                obj.destory();
+                obj.destroy();
             }, timeout);
         });
 
@@ -249,7 +249,7 @@ define(function (require) {
             setTimeout(function () {
                 expect(obj._placeholder).to.be(undefined);
                 done();
-                obj.destory();
+                obj.destroy();
             }, timeout);
         });
 
@@ -273,7 +273,7 @@ define(function (require) {
                 setTimeout(function () {
                     expect(triggered).to.be(2);
                     done();
-                    obj.destory();
+                    obj.destroy();
                 }, timeout);
             }, timeout);
         });
@@ -303,7 +303,7 @@ define(function (require) {
 
                 done();
 
-                obj1.destory();
+                obj1.destroy();
             }, timeout);
         });
 
@@ -316,7 +316,7 @@ define(function (require) {
             setTimeout(function () {
                 expect(element.css('position')).to.be(isPositionFixedSupported ? 'fixed' : 'absolute');
                 done();
-                obj.destory();
+                obj.destroy();
             }, timeout);
         });
 
@@ -333,7 +333,7 @@ define(function (require) {
                 setTimeout(function() {
                     expect(element.css('position').indexOf("sticky") !== -1 || element.css('position') === "static").to.be(true);
                     done();
-                    obj.destory();
+                    obj.destroy();
                 }, timeout);
             }, timeout);
         });
@@ -354,7 +354,7 @@ define(function (require) {
                     expect(element.css('position') === "static").to.be(true);
 
                     done();
-                    obj.destory();
+                    obj.destroy();
 
                 }, timeout);
             }, timeout);
@@ -384,7 +384,7 @@ define(function (require) {
                 setTimeout(function () {
                     expect(triggered).to.be(1);
                     done();
-                    obj.destory();
+                    obj.destroy();
                 }, timeout);
             }, timeout);
         });
@@ -415,10 +415,20 @@ define(function (require) {
                     setTimeout(function() {
                         expect(triggered).to.be(1);
                         done();
-                        obj.destory();
+                        obj.destroy();
                     }, timeout);
                 }, timeout);
             }, timeout);
+        });
+
+        it('window resize', function(done) {
+            var obj = Sticky.stick(element, setTop);
+            $(document).scrollTop(elementTop);
+            $(window).resize();
+
+            setTimeout(function() {
+                done();
+            }, 200);
         });
     });
 });

@@ -63,7 +63,7 @@ define(function (require, exports, module, undefined) {
         // or if resize window,
         // need adjust sticky element's status
         this.adjust = function() {
-            self._restore(true);
+            self._restore();
 
             var offset = self.elem.offset();
             self._originTop = offset.top;
@@ -200,7 +200,7 @@ define(function (require, exports, module, undefined) {
         }
     };
 
-    Sticky.prototype._restore = function (silent) {
+    Sticky.prototype._restore = function () {
         this._removePlaceholder();
 
         // set origin style
@@ -208,7 +208,7 @@ define(function (require, exports, module, undefined) {
 
         this.elem.data('sticked', false);
     
-        !silent && this.callback.call(this, false);
+        this.callback.call(this, false);
     };
 
     // need placeholder when: 1) position: static or relative, but expect for display != block
@@ -237,7 +237,7 @@ define(function (require, exports, module, undefined) {
     };
 
     Sticky.prototype.destroy = function () {
-        this._restore(true);
+        this._restore();
         this.elem.data("bind-sticked", false);
         $(window).off('scroll.sticky' + this._stickyId);
         $(window).off('resize.sticky' + this._stickyId);

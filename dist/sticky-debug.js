@@ -44,7 +44,7 @@ define("arale/sticky/1.3.1/sticky-debug", [ "$-debug" ], function(require, expor
         // or if resize window,
         // need adjust sticky element's status
         this.adjust = function() {
-            self._restore(true);
+            self._restore();
             var offset = self.elem.offset();
             self._originTop = offset.top;
             self._originLeft = offset.left;
@@ -159,12 +159,12 @@ define("arale/sticky/1.3.1/sticky-debug", [ "$-debug" ], function(require, expor
             this.callback.call(this, false);
         }
     };
-    Sticky.prototype._restore = function(silent) {
+    Sticky.prototype._restore = function() {
         this._removePlaceholder();
         // set origin style
         this.elem.css(this._originStyles);
         this.elem.data("sticked", false);
-        !silent && this.callback.call(this, false);
+        this.callback.call(this, false);
     };
     // need placeholder when: 1) position: static or relative, but expect for display != block
     Sticky.prototype._addPlaceholder = function() {
@@ -186,7 +186,7 @@ define("arale/sticky/1.3.1/sticky-debug", [ "$-debug" ], function(require, expor
         this._placeholder && this._placeholder.remove();
     };
     Sticky.prototype.destroy = function() {
-        this._restore(true);
+        this._restore();
         this.elem.data("bind-sticked", false);
         $(window).off("scroll.sticky" + this._stickyId);
         $(window).off("resize.sticky" + this._stickyId);
