@@ -1,4 +1,4 @@
-define("arale/sticky/1.3.0/sticky-debug", [ "$-debug" ], function(require, exports, module, undefined) {
+define("arale/sticky/1.3.1/sticky-debug", [ "$-debug" ], function(require, exports, module, undefined) {
     var $ = require("$-debug"), doc = $(document), stickyPrefix = [ "-webkit-", "-ms-", "-o-", "-moz-", "" ], guid = 0, ua = (window.navigator.userAgent || "").toLowerCase(), isIE = ua.indexOf("msie") !== -1, isIE6 = ua.indexOf("msie 6") !== -1;
     var isPositionStickySupported = checkPositionStickySupported(), isPositionFixedSupported = checkPositionFixedSupported();
     // Sticky
@@ -44,7 +44,7 @@ define("arale/sticky/1.3.0/sticky-debug", [ "$-debug" ], function(require, expor
         // or if resize window,
         // need adjust sticky element's status
         this.adjust = function() {
-            self._restore();
+            self._restore(true);
             var offset = self.elem.offset();
             self._originTop = offset.top;
             self._originLeft = offset.left;
@@ -85,6 +85,9 @@ define("arale/sticky/1.3.0/sticky-debug", [ "$-debug" ], function(require, expor
             if (!self.elem.is(":visible")) return;
             scrollFn.call(self);
         });
+        $(window).on("resize.sticky" + this._stickyId, debounce(function() {
+            self.adjust();
+        }, 120));
         this.elem.data("bind-sticked", true);
         return this;
     };
@@ -95,7 +98,7 @@ define("arale/sticky/1.3.0/sticky-debug", [ "$-debug" ], function(require, expor
         if (this.position.top !== undefined) {
             top = offsetTop - scrollTop <= this.position.top;
         }
-        // bottom is true when the  is distance from bottom of element to bottom of window <= position.bottom
+        // bottom is true when the distance is from bottom of element to bottom of window <= position.bottom
         if (this.position.bottom !== undefined) {
             bottom = scrollTop + $(window).height() - offsetTop - this.elem.outerHeight() <= this.position.bottom;
         }
@@ -156,12 +159,12 @@ define("arale/sticky/1.3.0/sticky-debug", [ "$-debug" ], function(require, expor
             this.callback.call(this, false);
         }
     };
-    Sticky.prototype._restore = function() {
+    Sticky.prototype._restore = function(silent) {
         this._removePlaceholder();
         // set origin style
         this.elem.css(this._originStyles);
         this.elem.data("sticked", false);
-        this.callback.call(this, false);
+        !silent && this.callback.call(this, false);
     };
     // need placeholder when: 1) position: static or relative, but expect for display != block
     Sticky.prototype._addPlaceholder = function() {
@@ -182,10 +185,11 @@ define("arale/sticky/1.3.0/sticky-debug", [ "$-debug" ], function(require, expor
         // remove placeholder if has
         this._placeholder && this._placeholder.remove();
     };
-    Sticky.prototype.destory = function() {
-        this._restore();
+    Sticky.prototype.destroy = function() {
+        this._restore(true);
         this.elem.data("bind-sticked", false);
         $(window).off("scroll.sticky" + this._stickyId);
+        $(window).off("resize.sticky" + this._stickyId);
     };
     // APIs
     // ---
@@ -244,5 +248,34 @@ define("arale/sticky/1.3.0/sticky-debug", [ "$-debug" ], function(require, expor
             el.parentNode.removeChild(el);
             return isSupported;
         }
+    }
+    // https://github.com/jashkenas/underscore/blob/master/underscore.js#L699
+    function getTime() {
+        return (Date.now || function() {
+            return new Date().getTime();
+        })();
+    }
+    function debounce(func, wait, immediate) {
+        var timeout, args, context, timestamp, result;
+        return function() {
+            context = this;
+            args = arguments;
+            timestamp = getTime();
+            var later = function() {
+                var last = getTime() - timestamp;
+                if (last < wait) {
+                    timeout = setTimeout(later, wait - last);
+                } else {
+                    timeout = null;
+                    if (!immediate) result = func.apply(context, args);
+                }
+            };
+            var callNow = immediate && !timeout;
+            if (!timeout) {
+                timeout = setTimeout(later, wait);
+            }
+            if (callNow) result = func.apply(context, args);
+            return result;
+        };
     }
 });
