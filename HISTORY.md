@@ -2,6 +2,12 @@
 
 ---
 
+## 1.3.1
+
+`tag:fixed` [#19](https://github.com/aralejs/sticky/issues/19),
+
+`tag:changed` `destory` -> `destroy`
+
 ## 1.3.0
 
 `tag:fixed` [#17](https://github.com/aralejs/sticky/issues/17), 添加 `adjust` 方法用于当元素被动改变位置时, 导致滚动条改变, 从而需要调整当前 sticky 元素状态

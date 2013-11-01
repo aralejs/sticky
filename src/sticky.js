@@ -63,7 +63,7 @@ define(function (require, exports, module, undefined) {
         // or if resize window,
         // need adjust sticky element's status
         this.adjust = function() {
-            self._restore();
+            self._restore(true);
 
             var offset = self.elem.offset();
             self._originTop = offset.top;
@@ -112,6 +112,10 @@ define(function (require, exports, module, undefined) {
             scrollFn.call(self);
         });
 
+        $(window).resize(debounce(function() {
+            self.adjust();
+        }, 200));
+
         this.elem.data('bind-sticked', true);
 
         return this;
@@ -125,7 +129,7 @@ define(function (require, exports, module, undefined) {
         if (this.position.top !== undefined) {
             top = offsetTop - scrollTop <= this.position.top;
         }
-        // bottom is true when the  is distance from bottom of element to bottom of window <= position.bottom
+        // bottom is true when the distance is from bottom of element to bottom of window <= position.bottom
         if (this.position.bottom !== undefined) {
             bottom = scrollTop + $(window).height() - offsetTop - this.elem.outerHeight() <= this.position.bottom;
         }
@@ -196,7 +200,7 @@ define(function (require, exports, module, undefined) {
         }
     };
 
-    Sticky.prototype._restore = function () {
+    Sticky.prototype._restore = function (silent) {
         this._removePlaceholder();
 
         // set origin style
@@ -204,7 +208,7 @@ define(function (require, exports, module, undefined) {
 
         this.elem.data('sticked', false);
     
-        this.callback.call(this, false);
+        !silent && this.callback.call(this, false);
     };
 
     // need placeholder when: 1) position: static or relative, but expect for display != block
@@ -232,8 +236,8 @@ define(function (require, exports, module, undefined) {
         this._placeholder && this._placeholder.remove();
     };
 
-    Sticky.prototype.destory = function () {
-        this._restore();
+    Sticky.prototype.destroy = function () {
+        this._restore(true);
         this.elem.data("bind-sticked", false);
         $(window).off('scroll.sticky' + this._stickyId);
     };
@@ -311,4 +315,33 @@ define(function (require, exports, module, undefined) {
         }
     }
 
+    // https://github.com/jashkenas/underscore/blob/master/underscore.js#L699
+    function getTime() {
+        return (Date.now || function() {
+            return new Date().getTime();
+        })()
+    }
+    function debounce(func, wait, immediate) {
+        var timeout, args, context, timestamp, result;
+        return function() {
+            context = this;
+            args = arguments;
+            timestamp = getTime();
+            var later = function() {
+                var last = getTime() - timestamp;
+                if (last < wait) {
+                    timeout = setTimeout(later, wait - last);
+                } else {
+                    timeout = null;
+                    if (!immediate) result = func.apply(context, args);
+                }
+            };
+            var callNow = immediate && !timeout;
+            if (!timeout) {
+                timeout = setTimeout(later, wait);
+            }
+            if (callNow) result = func.apply(context, args);
+            return result;
+        };
+    }
 });
