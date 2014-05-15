@@ -2,6 +2,10 @@
 
 ---
 
+## 1.4.0
+
+`improved` 升级到 spm@3.x 规范。
+
 ## 1.3.1
 
 `tag:fixed` [#19](https://github.com/aralejs/sticky/issues/19), 绑定 window 的 resize 事件
