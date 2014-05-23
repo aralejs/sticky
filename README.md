@@ -2,6 +2,7 @@
 
 ---
 
+[![spm package](http://spmjs.io/badge/arale-sticky)](http://spmjs.io/package/arale-sticky)
 [![Build Status](https://travis-ci.org/aralejs/sticky.png?branch=master)](https://travis-ci.org/aralejs/sticky)
 [![Coverage Status](https://coveralls.io/repos/aralejs/sticky/badge.png?branch=master)](https://coveralls.io/r/aralejs/sticky)
 
