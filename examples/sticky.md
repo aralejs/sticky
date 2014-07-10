@@ -39,7 +39,7 @@
 <div id="stick">Sticky Element(top)</div>
 
 <script>
-seajs.use(["$", "sticky"], function($, sticky) {
+seajs.use(["jquery", "index"], function($, sticky) {
     var st = sticky("#stick", 30, function(status) {
         if (status) {
             window.console && console.log("top stick");
@@ -87,7 +87,7 @@ seajs.use(["$", "sticky"], function($, sticky) {
 <div id="stick">Sticky Element(bottom)</div>
 
 <script>
-seajs.use(["$", "sticky"], function($, sticky) {
+seajs.use(["jquery", "index"], function($, sticky) {
     var st = sticky("#stick", { bottom: 30 }, function(status) {
         if (status) {
             window.console && console.log("bottom stick");
@@ -138,7 +138,7 @@ seajs.use(["$", "sticky"], function($, sticky) {
 <div id="stick">Sticky Element(top + bottom)</div>
 
 <script>
-seajs.use(["$", "sticky"], function($, sticky) {
+seajs.use(["jquery", "index"], function($, sticky) {
     var st = sticky("#stick", { top: 30, bottom: 30 }, function(status) {
         if (status) {
             window.console && console.log("top bottom stick");
@@ -177,7 +177,7 @@ seajs.use(["$", "sticky"], function($, sticky) {
 <div id="stick">Sticky Element(top)</div>
 
 <script>
-seajs.use(["$", "sticky"], function($, sticky) {
+seajs.use(["jquery", "index"], function($, sticky) {
     var st = sticky("#stick", 30, function(status) {
         if (status) {
             window.console && console.log("top stick");
