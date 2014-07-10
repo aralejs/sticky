@@ -53,7 +53,7 @@
 <div id="stick">跟随滚动的测试元素(top)</div>
 
 ````javascript
-seajs.use(["$", "sticky"], function($, sticky) {
+seajs.use(["jquery", "index"], function($, sticky) {
     // sticky
     var st = sticky("#stick", 30, function(status) {
         if (status) {

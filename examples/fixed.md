@@ -41,7 +41,7 @@ Sticky 附带的功能, 能模拟以下 CSS 设置:
 <div id="fix">Fix Element(top)</div>
 
 <script>
-seajs.use(["$", "sticky"], function($, sticky) {
+seajs.use(["jquery", "index"], function($, sticky) {
     var st = sticky.fix("#fix");
 });
 </script>
